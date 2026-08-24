@@ -1,0 +1,1274 @@
+#!/usr/bin/env python3
+"""
+run_gate.py — the pre-registered gate experiment for "Making History Help".
+
+    python run_gate.py --arm {T1,T2,T5,STATIC5} --seed N [--dry-run]
+
+What this script is FOR: making it impossible to run the experiment in a way
+that quietly violates the pre-registration.  It fails loudly and early rather
+than producing a plausible wrong number.  Every gr00t API it calls was read
+from NVIDIA/Isaac-GR00T source at the pinned commit; file:line citations are in
+the comments.  See MANIFEST.md for what is verified vs what awaits first run.
+
+Stages, in order:
+  0  required-human-input check  (config.FIXED_STEP_COUNT, eval-list digest)
+  1  provenance capture -> run_manifest.json                 (before anything)
+  2  preflight A/B/C/D -> hard fail on any violation
+  3  --dry-run: timed forward+backward, then exit 0 WITHOUT training
+  4  train  (subprocess, so a crash is classifiable rather than fatal here)
+  5  eval at exactly config.FIXED_STEP_COUNT -- no other checkpoint, ever
+  6  results.json + a ready-to-paste #results-log line
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import socket
+import subprocess
+import sys
+import time
+import traceback
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import config as C  # noqa: E402
+import provenance as P  # noqa: E402
+
+
+BANNER = "=" * 78
+
+
+def say(msg: str = "") -> None:
+    print(msg, flush=True)
+
+
+def die(msg: str, code: int = 2):
+    say("\n" + BANNER)
+    say("GATE ABORTED")
+    say(BANNER)
+    say(msg)
+    say(BANNER)
+    sys.exit(code)
+
+
+# ---------------------------------------------------------------------------
+# stage 0 — required human input
+# ---------------------------------------------------------------------------
+
+
+def check_required_human_input(need_eval_list: bool) -> None:
+    missing = []
+    if C.FIXED_STEP_COUNT is None:
+        missing.append(
+            "config.FIXED_STEP_COUNT is None. ROUND 5 of the project card requires "
+            "one integer, fixed before any run, at which every arm and seed is "
+            "evaluated. There is no default on purpose -- a default is a post-hoc "
+            "degree of freedom. Pick an integer in 5000-10000 that is a multiple "
+            f"of SAVE_STEPS ({C.SAVE_STEPS}) and set it."
+        )
+    if need_eval_list and C.EVAL_EPISODE_LIST_SHA256 is None:
+        missing.append(
+            "config.EVAL_EPISODE_LIST_SHA256 is None. Run "
+            "`python run_gate.py --make-eval-list` once, then paste the printed "
+            "digest into config.py. The list must be byte-identical across every "
+            "arm and every seed."
+        )
+    if missing:
+        die("REQUIRED HUMAN INPUT MISSING:\n\n  - " + "\n\n  - ".join(missing))
+
+    S = C.FIXED_STEP_COUNT
+    problems = []
+    if S % C.SAVE_STEPS != 0:
+        problems.append(
+            f"FIXED_STEP_COUNT={S} is not a multiple of SAVE_STEPS={C.SAVE_STEPS}; "
+            f"checkpoint-{S} would never be written."
+        )
+    if S > C.TRAIN_MAX_STEPS:
+        problems.append(
+            f"FIXED_STEP_COUNT={S} > TRAIN_MAX_STEPS={C.TRAIN_MAX_STEPS}; "
+            "training would stop before the evaluation checkpoint exists."
+        )
+    # save_total_limit evicts oldest checkpoints; checkpoint-S must survive to
+    # the end of training. HF keeps the most recent `save_total_limit`.
+    n_after = (C.TRAIN_MAX_STEPS - S) // C.SAVE_STEPS
+    if C.SAVE_TOTAL_LIMIT <= n_after:
+        problems.append(
+            f"SAVE_TOTAL_LIMIT={C.SAVE_TOTAL_LIMIT} is too small: {n_after} "
+            f"checkpoints are written after step {S}, so checkpoint-{S} would be "
+            f"evicted. Need SAVE_TOTAL_LIMIT > {n_after}."
+        )
+    if C.MULTIPROCESSING_CONTEXT != "fork":
+        problems.append(
+            f"MULTIPROCESSING_CONTEXT={C.MULTIPROCESSING_CONTEXT!r}. The "
+            "allow_padding guard is installed by monkey-patching a module "
+            "attribute; only forked dataloader workers inherit it. Under 'spawn' "
+            "the guard silently vanishes in the workers."
+        )
+    if problems:
+        die("PRE-REGISTRATION CONSISTENCY FAILURE:\n\n  - " + "\n\n  - ".join(problems))
+
+
+# ---------------------------------------------------------------------------
+# the frozen eval-episode list
+# ---------------------------------------------------------------------------
+#
+# See the long note in config.py: the stock GR00T LIBERO env cannot be driven
+# from LIBERO's canonical init-state IDs (libero_env.py:161-169 seeds robosuite
+# and never calls set_init_state), and only the FIRST reset of a rollout is
+# seeded (rollout_policy.py:302-309). So the unit we freeze is the reset seed,
+# and we evaluate in shards of exactly n_envs episodes so that every episode is
+# a seeded first reset.
+#
+# The seeds are generated by a fixed arithmetic rule, not an RNG, so a human
+# can verify the file by hand:
+#     base(task_idx, shard_idx) = MASTER + task_idx*100000 + shard_idx*SHARD
+#     episode seeds             = base + i, i in [0, SHARD)
+
+
+def build_eval_episode_list() -> dict:
+    if C.EVAL_EPISODES_PER_TASK % C.EVAL_SHARD_SIZE != 0:
+        die(
+            f"EVAL_EPISODES_PER_TASK={C.EVAL_EPISODES_PER_TASK} must be a multiple "
+            f"of EVAL_SHARD_SIZE={C.EVAL_SHARD_SIZE}, otherwise some episodes would "
+            "come from the unseeded autoreset path."
+        )
+    n_shards = C.EVAL_EPISODES_PER_TASK // C.EVAL_SHARD_SIZE
+    tasks = {}
+    for t_idx, env_name in enumerate(C.LIBERO_SPATIAL_TASKS):
+        bases, episodes = [], []
+        for s_idx in range(n_shards):
+            base = C.EVAL_LIST_MASTER_SEED + t_idx * 100000 + s_idx * C.EVAL_SHARD_SIZE
+            bases.append(base)
+            episodes.extend(base + i for i in range(C.EVAL_SHARD_SIZE))
+        tasks[env_name] = {"shard_base_seeds": bases, "episode_seeds": episodes}
+    return {
+        "schema": "mhh-gate/eval-episodes/1",
+        "note": (
+            "Frozen evaluation seeds. Identical for every arm and every seed. "
+            "base(task_idx, shard_idx) = MASTER + task_idx*100000 + "
+            "shard_idx*SHARD; episode seeds are base..base+SHARD-1. Each shard is "
+            "one rollout invocation with n_episodes == n_envs == SHARD so that "
+            "every episode is a SEEDED first reset."
+        ),
+        "master_seed": C.EVAL_LIST_MASTER_SEED,
+        "suite": C.LIBERO_SUITE,
+        "episodes_per_task": C.EVAL_EPISODES_PER_TASK,
+        "shard_size": C.EVAL_SHARD_SIZE,
+        "max_episode_steps": C.MAX_EPISODE_STEPS,
+        "n_action_steps": C.N_ACTION_STEPS,
+        "tasks": tasks,
+    }
+
+
+def make_eval_list() -> None:
+    path = Path(C.EVAL_EPISODE_LIST_PATH)
+    if path.exists():
+        die(
+            f"{path} already exists. Refusing to overwrite a frozen "
+            "pre-registration artifact. Move it aside by hand if you really "
+            "intend to re-freeze the eval list -- and note that doing so "
+            "invalidates every run made against the old digest."
+        )
+    payload = build_eval_episode_list()
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    digest = P.sha256_file(str(path))
+    say(BANNER)
+    say(f"wrote {path}")
+    say(f"  suite            : {payload['suite']}")
+    say(f"  tasks            : {len(payload['tasks'])}")
+    say(f"  episodes/task    : {payload['episodes_per_task']}")
+    say(f"  shard size       : {payload['shard_size']} (== n_envs)")
+    say(f"  total episodes   : {len(payload['tasks']) * payload['episodes_per_task']}")
+    say("")
+    say("Paste this into config.py as EVAL_EPISODE_LIST_SHA256:")
+    say(f'    EVAL_EPISODE_LIST_SHA256 = "{digest}"')
+    say(BANNER)
+
+
+def load_and_verify_eval_list() -> tuple[dict, str]:
+    path = Path(C.EVAL_EPISODE_LIST_PATH)
+    if not path.exists():
+        die(f"eval episode list not found at {path}. Run --make-eval-list first.")
+    digest = P.sha256_file(str(path))
+    if digest != C.EVAL_EPISODE_LIST_SHA256:
+        die(
+            "EVAL EPISODE LIST HASH MISMATCH.\n"
+            f"  file   : {path}\n"
+            f"  sha256 : {digest}\n"
+            f"  pinned : {C.EVAL_EPISODE_LIST_SHA256}\n"
+            "The evaluation set is part of the pre-registration; it must be "
+            "byte-identical across every arm and every seed. Either restore the "
+            "original file or, if the change is intentional, re-freeze it and "
+            "treat every earlier run as a different experiment."
+        )
+    data = json.loads(path.read_text())
+    for key, want in (
+        ("suite", C.LIBERO_SUITE),
+        ("episodes_per_task", C.EVAL_EPISODES_PER_TASK),
+        ("shard_size", C.EVAL_SHARD_SIZE),
+        ("max_episode_steps", C.MAX_EPISODE_STEPS),
+        ("n_action_steps", C.N_ACTION_STEPS),
+    ):
+        if data.get(key) != want:
+            die(
+                f"eval list field {key}={data.get(key)!r} disagrees with config.py "
+                f"({want!r}). One of them was edited after freezing."
+            )
+    return data, digest
+
+
+# ---------------------------------------------------------------------------
+# run bookkeeping + crash policy
+# ---------------------------------------------------------------------------
+#
+# ROUND 5, "Crashes": infrastructure failure -> at most ONE exact-seed rerun;
+# divergence/NaN -> retained and reported as a failed run, NEVER replaced by a
+# fresh seed. Both halves are enforced here rather than left to memory.
+
+LEDGER_NAME = "attempts.json"
+
+
+def ledger_path() -> Path:
+    return Path(C.RUNS_DIR) / LEDGER_NAME
+
+
+def read_ledger() -> dict:
+    p = ledger_path()
+    if p.exists():
+        return json.loads(p.read_text())
+    return {}
+
+
+def write_ledger(led: dict) -> None:
+    p = ledger_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(led, indent=2, sort_keys=True) + "\n")
+
+
+def ledger_key(arm: str, seed: int) -> str:
+    return f"{arm}/seed{seed}"
+
+
+def authorize_attempt(arm: str, seed: int, force: bool) -> int:
+    """Return the attempt number, or die if the crash policy forbids another."""
+    led = read_ledger()
+    hist = led.get(ledger_key(arm, seed), [])
+    finished = [a for a in hist if a.get("status") in
+                ("completed", "diverged", "crashed", "aborted")]
+
+    if any(a["status"] == "completed" for a in finished):
+        if not force:
+            die(
+                f"{arm} seed {seed} already has a COMPLETED attempt "
+                f"(attempt {[a['attempt'] for a in finished if a['status']=='completed']}). "
+                "Re-running it would create a second result for a pre-registered "
+                "cell. If you genuinely need to (e.g. the first result was "
+                "discarded in writing), pass --force-new-attempt and say why in "
+                "the run notes."
+            )
+    if any(a["status"] == "diverged" for a in finished):
+        die(
+            f"{arm} seed {seed} DIVERGED on a previous attempt. Per the "
+            "pre-registration (ROUND 5, Crashes), a diverged run is retained and "
+            "reported as a failed run and is NEVER replaced by a rerun or a fresh "
+            "seed. Report it. Do not retry."
+        )
+    crashed = [a for a in finished if a["status"] == "crashed"]
+    if len(crashed) >= 1 and not force:
+        already_retried = len(crashed) >= 2 or any(
+            a["attempt"] > 1 for a in finished
+        )
+        if already_retried:
+            die(
+                f"{arm} seed {seed} has already used its ONE permitted exact-seed "
+                "rerun after an infrastructure crash. A third attempt is outside "
+                "the pre-registration. Escalate to the humans."
+            )
+        say(
+            f"[crash policy] {arm} seed {seed} crashed once; this is the ONE "
+            "permitted exact-seed rerun."
+        )
+    return len(hist) + 1
+
+
+def record_attempt(arm: str, seed: int, attempt: int, status: str, extra: dict) -> None:
+    led = read_ledger()
+    key = ledger_key(arm, seed)
+    hist = [a for a in led.get(key, []) if a.get("attempt") != attempt]
+    hist.append({"attempt": attempt, "status": status,
+                 "recorded_at_utc": P.utc_now(), **extra})
+    led[key] = sorted(hist, key=lambda a: a["attempt"])
+    write_ledger(led)
+
+
+# ---------------------------------------------------------------------------
+# config assembly (mirrors gr00t/experiment/launch_finetune.py)
+# ---------------------------------------------------------------------------
+
+
+def build_gr00t_config(arm: str, seed: int, output_dir: str, max_steps: int):
+    """Build the full ``Config`` the way ``launch_finetune.py`` does, plus the
+    two things its CLI cannot express: ``data.allow_padding`` and the arm's
+    ``video.delta_indices``.
+
+    Every assignment below has a counterpart in launch_finetune.py:61-128; the
+    deviations are marked ``# GATE:``.
+    """
+    from gr00t.configs.base_config import get_default_config
+    from gr00t.data.embodiment_tags import EmbodimentTag
+    import preflight
+
+    tag = EmbodimentTag.resolve(C.EMBODIMENT_TAG)
+
+    config = get_default_config().load_dict(
+        {
+            "data": {
+                "download_cache": False,
+                "datasets": [
+                    {
+                        "dataset_paths": [C.DATASET_PATH],
+                        "mix_ratio": 1.0,
+                        "embodiment_tag": tag.value,
+                    }
+                ],
+            }
+        }
+    )
+    config.load_config_path = None
+
+    # --- model (launch_finetune.py:78-102) ---------------------------------
+    config.model.tune_llm = C.TUNE_LLM
+    config.model.tune_visual = C.TUNE_VISUAL
+    config.model.tune_projector = C.TUNE_PROJECTOR
+    config.model.tune_diffusion_model = C.TUNE_DIFFUSION_MODEL
+    config.model.state_dropout_prob = C.STATE_DROPOUT_PROB
+    config.model.random_rotation_angle = None
+    config.model.color_jitter_params = None
+    config.model.use_percentiles = C.USE_PERCENTILES
+    config.model.extra_augmentation_config = None
+    config.model.load_bf16 = False
+    config.model.reproject_vision = False
+    config.model.model_name = "nvidia/Cosmos-Reason2-2B"
+    config.model.backbone_trainable_params_fp32 = True
+    config.model.use_relative_action = True
+    # GATE: recorded, and asserted inert by preflight (issue #745).
+    config.model.use_mean_std = C.USE_MEAN_STD
+
+    # --- training (launch_finetune.py:104-128) ------------------------------
+    config.training.experiment_name = None      # output_dir.name becomes the name
+    config.training.start_from_checkpoint = C.BASE_MODEL_PATH
+    config.training.optim = "adamw_torch"
+    config.training.global_batch_size = C.GLOBAL_BATCH_SIZE
+    config.training.dataloader_num_workers = C.DATALOADER_NUM_WORKERS
+    config.training.learning_rate = C.LEARNING_RATE
+    config.training.gradient_accumulation_steps = C.GRADIENT_ACCUMULATION_STEPS
+    config.training.output_dir = output_dir
+    config.training.save_steps = C.SAVE_STEPS
+    config.training.save_total_limit = C.SAVE_TOTAL_LIMIT
+    config.training.num_gpus = C.NUM_GPUS
+    config.training.use_wandb = bool(int(os.environ.get("USE_WANDB", "0")))
+    config.training.max_steps = max_steps
+    config.training.weight_decay = C.WEIGHT_DECAY
+    config.training.warmup_ratio = C.WARMUP_RATIO
+    config.training.wandb_project = "mhh-gate"
+    config.training.save_only_model = False
+    config.training.resume_from_checkpoint = False
+    config.training.skip_weight_loading = False
+
+    # --- data ---------------------------------------------------------------
+    config.data.shard_size = C.SHARD_SIZE
+    config.data.episode_sampling_rate = C.EPISODE_SAMPLING_RATE
+    config.data.ds_weights_alpha = None
+    # GATE: experiment.py:203 set_seed(config.data.seed) and :294
+    # TrainingArguments(seed=...) both read this single field, and factory.py:67
+    # hands it to the dataset sharding RNG. One knob, logged.
+    config.data.seed = seed
+    # GATE: the whole point. data_config.py:94; FinetuneConfig cannot express it.
+    config.data.allow_padding = C.ALLOW_PADDING
+    config.data.multiprocessing_context = C.MULTIPROCESSING_CONTEXT
+    # GATE: the arm.
+    config.data.modality_configs = preflight.build_modality_configs(C.ARMS[arm])
+
+    # --- prohibitions, asserted rather than trusted -------------------------
+    # No best-checkpoint selection anywhere: a non-empty metric name installs
+    # BestMetricCheckpointCallback (experiment.py:318-325).
+    if config.training.save_best_eval_metric_name != "":
+        raise RuntimeError(
+            "save_best_eval_metric_name is set; best-checkpoint selection is "
+            "prohibited by the pre-registration."
+        )
+    if config.training.eval_strategy != "no":
+        raise RuntimeError(
+            f"eval_strategy={config.training.eval_strategy!r}; the gate evaluates "
+            "only at the fixed step, via closed-loop rollouts, never through the "
+            "trainer's own eval loop."
+        )
+    if config.training.resume_from_checkpoint:
+        raise RuntimeError("resume_from_checkpoint must be False for a fresh run.")
+    return config
+
+
+# ---------------------------------------------------------------------------
+# stage 3 — dry run throughput
+# ---------------------------------------------------------------------------
+
+
+def timed_throughput(arm: str, seed: int) -> dict:
+    """One timed forward+backward loop at the real batch size and history depth.
+
+    This is the ~$1 harness check that precedes the 16 real GPU-hours.  It
+    approximates the HF trainer's bf16 path with ``torch.autocast``; the
+    trainer itself passes ``bf16=True`` to ``TrainingArguments``
+    (experiment.py:283), which is not bit-identical to this loop.  The number
+    is a planning estimate, not a benchmark.
+    """
+    import torch
+    from gr00t.data.dataset.sharded_single_step_dataset import ShardedSingleStepDataset
+    from gr00t.data.embodiment_tags import EmbodimentTag
+    import preflight
+
+    if not torch.cuda.is_available():
+        return {"error": "no CUDA device; throughput not measured"}
+
+    delta = C.ARMS[arm]
+    tag = EmbodimentTag.resolve(C.EMBODIMENT_TAG)
+    modality_configs = preflight.build_modality_configs(delta)
+
+    processor = preflight.build_processor(delta)
+    ds = ShardedSingleStepDataset(
+        dataset_path=C.DATASET_PATH,
+        embodiment_tag=tag,
+        modality_configs=modality_configs[C.EMBODIMENT_VALUE],
+        shard_size=max(C.GLOBAL_BATCH_SIZE * 2, 64),
+        episode_sampling_rate=C.EPISODE_SAMPLING_RATE,
+        seed=seed,
+        allow_padding=C.ALLOW_PADDING,
+    )
+    ds.processor = processor
+    shard = ds.get_shard(0)
+    if len(shard) < C.GLOBAL_BATCH_SIZE:
+        return {"error": f"shard has {len(shard)} datapoints, need "
+                         f"{C.GLOBAL_BATCH_SIZE}"}
+    batch = processor.collator(shard[: C.GLOBAL_BATCH_SIZE])["inputs"]
+
+    model = preflight.load_base_model(for_training=True).to("cuda:0")
+    model.train()
+    params = [p for p in model.parameters() if p.requires_grad]
+    opt = torch.optim.AdamW(params, lr=C.LEARNING_RATE, weight_decay=C.WEIGHT_DECAY)
+
+    torch.cuda.reset_peak_memory_stats(0)
+    losses = []
+
+    def one_step():
+        opt.zero_grad(set_to_none=True)
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            out = model(batch)
+            loss = out["loss"]
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(params, 1.0)
+        opt.step()
+        return float(loss.detach())
+
+    for _ in range(C.DRY_RUN_WARMUP_STEPS):
+        losses.append(one_step())
+    torch.cuda.synchronize()
+    t0 = time.time()
+    for _ in range(C.DRY_RUN_TIMED_STEPS):
+        losses.append(one_step())
+    torch.cuda.synchronize()
+    elapsed = time.time() - t0
+
+    s_per_step = elapsed / C.DRY_RUN_TIMED_STEPS
+    # One optimiser step = gradient_accumulation_steps forward/backwards.
+    s_per_optim_step = s_per_step * C.GRADIENT_ACCUMULATION_STEPS
+    proj_hours = s_per_optim_step * C.FIXED_STEP_COUNT / 3600.0
+    peak = torch.cuda.max_memory_allocated(0) / 2**30
+    finite = all(l == l and abs(l) != float("inf") for l in losses)
+
+    result = {
+        "batch_size_per_forward": C.GLOBAL_BATCH_SIZE,
+        "video_delta_indices": delta,
+        "images_per_sample": len(delta)
+        * len(modality_configs[C.EMBODIMENT_VALUE]["video"].modality_keys),
+        "timed_steps": C.DRY_RUN_TIMED_STEPS,
+        "seconds_per_forward_backward": round(s_per_step, 4),
+        "seconds_per_optimizer_step": round(s_per_optim_step, 4),
+        "projected_hours_to_fixed_step": round(proj_hours, 2),
+        "projected_usd_at_config_rate": round(proj_hours * C.A40_USD_PER_HOUR, 2),
+        "usd_per_hour_used": C.A40_USD_PER_HOUR,
+        "peak_vram_gib": round(peak, 2),
+        "losses_finite": finite,
+        "first_loss": losses[0] if losses else None,
+        "last_loss": losses[-1] if losses else None,
+        "caveat": (
+            "torch.autocast approximation of the trainer's bf16 path; not a "
+            "benchmark, a planning estimate"
+        ),
+    }
+    if not finite:
+        result["ERROR"] = "non-finite loss in the dry run -- do not start training"
+    del model, opt
+    torch.cuda.empty_cache()
+    return result
+
+
+# ---------------------------------------------------------------------------
+# stage 4 — training (in a subprocess so a crash is classifiable)
+# ---------------------------------------------------------------------------
+
+
+def train_worker(arm: str, seed: int, output_dir: str, max_steps: int) -> None:
+    """Runs inside the child process. Installs the guard, then hands off."""
+    import preflight
+
+    # Fatal guard for the WHOLE run, not just preflight: any call that reaches
+    # extract_step_data with allow_padding=False -- in this process or in a
+    # forked dataloader worker -- raises and takes the run down.
+    preflight.install_padding_guard(fatal=True)
+
+    from gr00t.experiment.experiment import run
+
+    config = build_gr00t_config(arm, seed, output_dir, max_steps)
+    say(f"[train] arm={arm} seed={seed} max_steps={max_steps}")
+    say(f"[train] video.delta_indices="
+        f"{config.data.modality_configs[C.EMBODIMENT_VALUE]['video'].delta_indices}")
+    say(f"[train] data.allow_padding={config.data.allow_padding} "
+        f"data.seed={config.data.seed}")
+    run(config)
+    say("[train] experiment.run returned normally")
+
+
+def scan_for_divergence(output_dir: str) -> dict:
+    """Look for a non-finite loss in every trainer_state.json under output_dir.
+
+    ``assert_loss_less_than`` (training_config.py:124) would not catch NaN --
+    ``nan > x`` is False -- so divergence is detected here instead, from the
+    logged history the trainer writes at every checkpoint.
+    """
+    bad, scanned, last = [], 0, None
+    for state_file in sorted(Path(output_dir).rglob("trainer_state.json")):
+        scanned += 1
+        try:
+            hist = json.loads(state_file.read_text()).get("log_history", [])
+        except Exception:
+            continue
+        for entry in hist:
+            loss = entry.get("loss")
+            if loss is None:
+                continue
+            last = loss
+            if loss != loss or abs(loss) == float("inf"):
+                bad.append({"file": str(state_file), "step": entry.get("step"),
+                            "loss": str(loss)})
+    return {"trainer_state_files_scanned": scanned, "last_logged_loss": last,
+            "non_finite_entries": bad, "diverged": bool(bad)}
+
+
+# ---------------------------------------------------------------------------
+# stage 5 — evaluation at the fixed step
+# ---------------------------------------------------------------------------
+
+
+def checkpoint_dir_for(output_dir: str, step: int) -> Path:
+    """The one checkpoint the gate is allowed to look at.
+
+    ``CheckpointFormatCallback`` (experiment.py:311-316) populates each
+    ``checkpoint-<step>`` with the processor/config artifacts the eval server
+    needs, so the checkpoint directory is loadable directly by
+    ``run_gr00t_server.py --model-path``.
+    """
+    return Path(output_dir) / f"checkpoint-{step}"
+
+
+def assert_only_fixed_step_used(output_dir: str, step: int) -> Path:
+    ckpt = checkpoint_dir_for(output_dir, step)
+    if not ckpt.is_dir():
+        available = sorted(p.name for p in Path(output_dir).glob("checkpoint-*"))
+        die(
+            f"checkpoint-{step} does not exist in {output_dir}.\n"
+            f"available: {available}\n"
+            "The gate evaluates ONLY at the pre-registered fixed step. Picking a "
+            "nearby checkpoint is exactly the leak ROUND 5 called 'the single most "
+            "dangerous leak found'. Fix the run, do not move the goalposts."
+        )
+    return ckpt
+
+
+_CLIENT_SNIPPET = r"""
+import json, os, sys
+os.environ.setdefault("MUJOCO_GL", "egl")
+os.environ.setdefault("PYOPENGL_PLATFORM", "egl")
+from gr00t.eval.rollout_policy import run_gr00t_sim_policy
+a = json.loads(sys.argv[1])
+env_name, successes, infos = run_gr00t_sim_policy(
+    env_name=a["env_name"],
+    n_episodes=a["n_episodes"],
+    max_episode_steps=a["max_episode_steps"],
+    model_path="",
+    policy_client_host=a["host"],
+    policy_client_port=a["port"],
+    n_envs=a["n_envs"],
+    n_action_steps=a["n_action_steps"],
+    video_dir=a["video_dir"],
+    seed=a["seed"],
+)
+print("MHH_RESULT_JSON " + json.dumps({
+    "env_name": env_name,
+    "successes": [bool(s) for s in successes],
+    "episode_lengths": [int(x) for x in infos.get("episode_lengths", [])],
+    "episode_rewards": [float(x) for x in infos.get("episode_rewards", [])],
+}))
+"""
+
+
+def start_policy_server(ckpt: Path, log_path: Path):
+    """Launch run_gr00t_server.py and wait for it to bind.
+
+    Port bind is a genuine readiness signal here, not a guess: the server
+    constructs ``Gr00tPolicy`` (which loads the checkpoint) BEFORE entering the
+    ``with PolicyServer(...)`` block that binds (run_gr00t_server.py:105-167).
+    """
+    cmd = [
+        sys.executable,
+        os.path.join(C.GROOT_REPO, "gr00t/eval/run_gr00t_server.py"),
+        "--model-path", str(ckpt),
+        "--embodiment-tag", C.EMBODIMENT_TAG,
+        "--host", "0.0.0.0",
+        "--port", str(C.POLICY_SERVER_PORT),
+        "--use-sim-policy-wrapper",
+    ]
+    say(f"[eval] starting policy server: {' '.join(cmd)}")
+    log = open(log_path, "w")
+    proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT,
+                            cwd=C.GROOT_REPO)
+    deadline = time.time() + C.SERVER_STARTUP_TIMEOUT_S
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            log.close()
+            die(
+                f"policy server exited early (code {proc.returncode}). "
+                f"Log: {log_path}\n" + _tail(log_path)
+            )
+        with socket.socket() as s:
+            s.settimeout(2.0)
+            if s.connect_ex((C.POLICY_SERVER_HOST, C.POLICY_SERVER_PORT)) == 0:
+                say(f"[eval] server bound on port {C.POLICY_SERVER_PORT}")
+                return proc, log
+        time.sleep(5)
+    proc.kill()
+    log.close()
+    die(f"policy server did not bind within {C.SERVER_STARTUP_TIMEOUT_S}s. "
+        f"Log: {log_path}\n" + _tail(log_path))
+
+
+def _tail(path: Path, n: int = 40) -> str:
+    try:
+        lines = Path(path).read_text(errors="replace").splitlines()
+    except Exception:
+        return "(log unreadable)"
+    return "\n".join(lines[-n:])
+
+
+def run_eval(ckpt: Path, eval_list: dict, run_dir: Path, label: str) -> dict:
+    """Closed-loop evaluation of ONE checkpoint over the frozen episode list."""
+    if not os.path.exists(C.LIBERO_VENV_PYTHON):
+        die(
+            f"LIBERO eval interpreter not found at {C.LIBERO_VENV_PYTHON}. "
+            "Run `bash gr00t/eval/sim/LIBERO/setup_libero.sh` on the pod first."
+        )
+    eval_dir = run_dir / f"eval_{label}"
+    eval_dir.mkdir(parents=True, exist_ok=True)
+    server, log = start_policy_server(ckpt, eval_dir / "policy_server.log")
+
+    per_task: dict = {}
+    try:
+        for env_name, spec in eval_list["tasks"].items():
+            successes, lengths, seeds_used = [], [], []
+            for base in spec["shard_base_seeds"]:
+                args = {
+                    "env_name": env_name,
+                    "n_episodes": C.EVAL_SHARD_SIZE,
+                    "n_envs": C.EVAL_SHARD_SIZE,
+                    "max_episode_steps": C.MAX_EPISODE_STEPS,
+                    "n_action_steps": C.N_ACTION_STEPS,
+                    "host": C.POLICY_SERVER_HOST,
+                    "port": C.POLICY_SERVER_PORT,
+                    "seed": base,
+                    "video_dir": str(eval_dir / "videos" / env_name.split("/")[-1]
+                                     / f"seed{base}"),
+                }
+                say(f"[eval] {env_name} shard base_seed={base}")
+                out = subprocess.run(
+                    [C.LIBERO_VENV_PYTHON, "-c", _CLIENT_SNIPPET, json.dumps(args)],
+                    cwd=C.GROOT_REPO, capture_output=True, text=True,
+                )
+                shard_log = (eval_dir / "client_logs")
+                shard_log.mkdir(exist_ok=True)
+                (shard_log / f"{env_name.split('/')[-1]}_{base}.log").write_text(
+                    (out.stdout or "") + "\n--- STDERR ---\n" + (out.stderr or "")
+                )
+                if out.returncode != 0:
+                    die(
+                        f"eval shard failed (exit {out.returncode}) for {env_name} "
+                        f"base_seed={base}. Tail:\n" + (out.stderr or out.stdout)[-3000:]
+                    )
+                payload = None
+                for line in out.stdout.splitlines():
+                    if line.startswith("MHH_RESULT_JSON "):
+                        payload = json.loads(line[len("MHH_RESULT_JSON "):])
+                if payload is None:
+                    die(f"eval shard for {env_name} base_seed={base} produced no "
+                        "MHH_RESULT_JSON line -- refusing to invent a result.")
+                # No early stopping, no partial shards: the pre-registration
+                # fixes E per task.
+                if len(payload["successes"]) != C.EVAL_SHARD_SIZE:
+                    say(f"!! shard returned {len(payload['successes'])} episodes, "
+                        f"expected {C.EVAL_SHARD_SIZE} (invalid episodes are "
+                        "filtered by rollout_policy.py:485-491) -- recorded as-is")
+                successes.extend(payload["successes"])
+                lengths.extend(payload["episode_lengths"])
+                seeds_used.extend(base + i for i in range(C.EVAL_SHARD_SIZE))
+            n = len(successes)
+            per_task[env_name] = {
+                "n_episodes": n,
+                "n_success": int(sum(successes)),
+                "success_rate": (sum(successes) / n) if n else None,
+                "successes": [bool(s) for s in successes],
+                "episode_lengths": lengths,
+                "reset_seeds": seeds_used,
+            }
+            say(f"[eval] {env_name}: {per_task[env_name]['n_success']}/{n}")
+    finally:
+        server.terminate()
+        try:
+            server.wait(timeout=60)
+        except subprocess.TimeoutExpired:
+            server.kill()
+        log.close()
+
+    rates = [v["success_rate"] for v in per_task.values() if v["success_rate"] is not None]
+    macro = sum(rates) / len(rates) if rates else None
+    return {
+        "checkpoint": str(ckpt),
+        "label": label,
+        # ROUND 5, Aggregation: unweighted macro-average of the 10 task SRs.
+        "suite_success_rate_macro": macro,
+        "n_tasks": len(per_task),
+        "total_episodes": sum(v["n_episodes"] for v in per_task.values()),
+        "per_task": per_task,
+    }
+
+
+# ---------------------------------------------------------------------------
+# one-off: is the eval initial state actually determined by the seed?
+# ---------------------------------------------------------------------------
+
+
+def verify_eval_determinism(checkpoint: str) -> int:
+    """Run one task's first eval shard TWICE with identical seeds and compare.
+
+    The whole eval design assumes robosuite's ``OffScreenRenderEnv`` initial
+    state is determined by ``.seed()`` -- LiberoEnv.reset() calls
+    ``self._env.seed(int(seed))`` then ``self._env.reset()``
+    (libero_env.py:161-169) and never touches LIBERO's canonical
+    ``set_init_state``. That assumption CANNOT be checked without a GPU, so it
+    is checked here, once, on the first pod, before 16 GPU-hours ride on it.
+
+    A match on the per-episode length vector is strong evidence of determinism
+    (identical policy + identical start -> identical trajectory). A mismatch
+    means the frozen eval list does not do what the pre-registration needs, and
+    the design must be revisited BEFORE any arm is compared.
+    """
+    eval_list, digest = load_and_verify_eval_list()
+    ckpt = Path(checkpoint)
+    if not ckpt.is_dir():
+        die(f"checkpoint {ckpt} is not a directory")
+    tmp = Path(C.RUNS_DIR) / "eval_determinism_check"
+    tmp.mkdir(parents=True, exist_ok=True)
+
+    env_name = next(iter(eval_list["tasks"]))
+    base = eval_list["tasks"][env_name]["shard_base_seeds"][0]
+    one_shard = {
+        "tasks": {env_name: {"shard_base_seeds": [base],
+                             "episode_seeds": [base + i
+                                               for i in range(C.EVAL_SHARD_SIZE)]}}
+    }
+    say(f"[determinism] task={env_name} base_seed={base} "
+        f"episodes={C.EVAL_SHARD_SIZE}, running twice")
+    a = run_eval(ckpt, one_shard, tmp, "determinism_a")
+    b = run_eval(ckpt, one_shard, tmp, "determinism_b")
+    la = a["per_task"][env_name]["episode_lengths"]
+    lb = b["per_task"][env_name]["episode_lengths"]
+    sa = a["per_task"][env_name]["successes"]
+    sb = b["per_task"][env_name]["successes"]
+    same = (la == lb) and (sa == sb)
+    out = {
+        "eval_list_sha256": digest,
+        "env_name": env_name,
+        "base_seed": base,
+        "run_a": {"episode_lengths": la, "successes": sa},
+        "run_b": {"episode_lengths": lb, "successes": sb},
+        "identical": same,
+        "interpretation": (
+            "identical -> reset seeds fix the initial state; the frozen eval list "
+            "gives arm-matched episodes as the pre-registration requires. "
+            "NOT identical -> the eval design's core assumption is false; stop and "
+            "redesign the eval before comparing any arms."
+        ),
+    }
+    (tmp / "determinism_check.json").write_text(
+        json.dumps(out, indent=2, sort_keys=True) + "\n"
+    )
+    say(BANNER)
+    say(f"episode lengths A: {la}")
+    say(f"episode lengths B: {lb}")
+    say(f"successes      A: {sa}")
+    say(f"successes      B: {sb}")
+    say(f"IDENTICAL: {same}")
+    say(f"written to {tmp/'determinism_check.json'}")
+    say(BANNER)
+    return 0 if same else 6
+
+
+# ---------------------------------------------------------------------------
+# stage 6 — the results-log line
+# ---------------------------------------------------------------------------
+
+
+def results_log_line(m: dict) -> str:
+    arch = m.get("preflight", {}).get("B_architecture", {})
+    prov = m.get("provenance", {})
+    ev = m.get("eval_primary") or {}
+    sr = ev.get("suite_success_rate_macro")
+    fields = [
+        f"RUN {m['run_id']}",
+        f"arm={m['arm']}",
+        f"seed={m['seed']}",
+        f"steps={m['fixed_step_count']}",
+        f"groot={str(prov.get('isaac_groot', {}).get('commit'))[:9]}",
+        f"mujoco={prov.get('libero_eval_env', {}).get('mujoco', '?')}",
+        f"eval_eps={ev.get('total_episodes', '-')}",
+        f"eval_list={m.get('eval_list_sha256', '?')[:12]}",
+        f"allow_padding_asserted={m.get('preflight', {}).get('A_allow_padding', {}).get('verdict', 'NOT-RUN')}",
+        f"arch=LLM{arch.get('llm_layers_loaded', '?')}/DiT{arch.get('dit_blocks_loaded', '?')}",
+        f"SR={'%.4f' % sr if isinstance(sr, float) else '-'}",
+        f"wallclock_h={m.get('wall_clock_hours', '-')}",
+        f"cost_usd~={m.get('estimated_cost_usd', '-')}",
+        f"status={m.get('status', '?')}",
+        f"weirdness={m.get('weirdness') or 'none'}",
+    ]
+    return "| " + " | ".join(fields) + " |"
+
+
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
+
+
+def parse_args(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--arm", choices=sorted(C.ARMS))
+    ap.add_argument("--seed", type=int)
+    ap.add_argument("--dry-run", action="store_true",
+                    help="preflight + provenance + one timed step, then exit. "
+                         "No training. This is the ~$1 harness validation.")
+    ap.add_argument("--stage", default="all",
+                    choices=["all", "preflight", "train", "eval", "_train_worker"])
+    ap.add_argument("--run-dir", default=None,
+                    help="internal: reuse an existing run directory")
+    ap.add_argument("--max-steps", type=int, default=None,
+                    help="override TRAIN_MAX_STEPS. Only legitimate use is the "
+                         "pre-registered convergence-check arm (ROUND 4 item 2). "
+                         "The evaluation step stays FIXED_STEP_COUNT regardless.")
+    ap.add_argument("--convergence-arm", action="store_true",
+                    help="ROUND 4 item 2: train 2x TRAIN_MAX_STEPS and add a "
+                         "second, EXPLORATORY evaluation at 2x FIXED_STEP_COUNT. "
+                         "The primary endpoint is unchanged.")
+    ap.add_argument("--make-eval-list", action="store_true")
+    ap.add_argument("--verify-eval-determinism", metavar="CHECKPOINT",
+                    help="run ONE task's first eval shard twice against the given "
+                         "checkpoint with identical seeds and report whether the "
+                         "per-episode length vectors match. This is the check for "
+                         "the one assumption the eval design rests on and cannot "
+                         "be verified off-GPU: that robosuite's initial state is "
+                         "determined by .seed(). Run it once on the first pod.")
+    ap.add_argument("--allow-commit-drift", action="store_true",
+                    help="proceed even if the installed Isaac-GR00T commit is not "
+                         "the pinned one. Recorded in the manifest.")
+    ap.add_argument("--force-new-attempt", action="store_true")
+    ap.add_argument("--notes", default="",
+                    help="free-text run notes, stored in the manifest")
+    return ap.parse_args(argv)
+
+
+def main(argv=None) -> int:
+    args = parse_args(argv)
+
+    if args.make_eval_list:
+        make_eval_list()
+        return 0
+
+    if args.verify_eval_determinism:
+        return verify_eval_determinism(args.verify_eval_determinism)
+
+    if not args.arm or args.seed is None:
+        die("--arm and --seed are required (or use --make-eval-list).")
+
+    arm, seed = args.arm, args.seed
+    delta = C.ARMS[arm]
+
+    # ---- the internal training child ---------------------------------------
+    if args.stage == "_train_worker":
+        if not args.run_dir:
+            die("_train_worker requires --run-dir")
+        train_worker(arm, seed, os.path.join(args.run_dir, "train"),
+                     args.max_steps or C.TRAIN_MAX_STEPS)
+        return 0
+
+    needs_eval = args.stage in ("all", "eval") and not args.dry_run
+    check_required_human_input(need_eval_list=needs_eval)
+
+    if seed not in C.PREREGISTERED_SEEDS:
+        say(f"!! WARNING: seed {seed} is not one of the pre-registered seeds "
+            f"{C.PREREGISTERED_SEEDS}. It will be recorded as off-protocol and "
+            "must not be pooled with the pre-registered cells.")
+
+    if args.stage == "eval" and not args.run_dir:
+        die("--stage eval needs --run-dir pointing at the run directory whose "
+            "train/ holds the checkpoint. Evaluating without the run that "
+            "produced the checkpoint would lose the provenance and the preflight "
+            "record that make the number reportable.")
+
+    eval_list, eval_digest = ({}, None)
+    if needs_eval or args.stage == "eval":
+        eval_list, eval_digest = load_and_verify_eval_list()
+
+    # ---- run directory ------------------------------------------------------
+    if args.run_dir:
+        run_dir = Path(args.run_dir)
+        attempt = int(json.loads((run_dir / "run_manifest.json").read_text())["attempt"])
+    else:
+        attempt = authorize_attempt(arm, seed, args.force_new_attempt)
+        run_dir = Path(C.RUNS_DIR) / f"{arm}_seed{seed}_att{attempt}"
+        if run_dir.exists() and not args.dry_run:
+            die(f"{run_dir} already exists. Refusing to write into it -- move it "
+                "aside by hand if you mean to discard it.")
+    run_dir.mkdir(parents=True, exist_ok=True)
+    run_id = f"{arm}-s{seed}-a{attempt}"
+    t_start = time.time()
+
+    say(BANNER)
+    say(f"MHH GATE  run_id={run_id}")
+    say(f"  arm                : {arm}  video.delta_indices={delta}")
+    say(f"  seed               : {seed}")
+    say(f"  fixed step (eval)  : {C.FIXED_STEP_COUNT}")
+    say(f"  run dir            : {run_dir}")
+    say(f"  mode               : {'DRY RUN (no training)' if args.dry_run else args.stage}")
+    say(BANNER)
+
+    manifest: dict = {
+        "run_id": run_id,
+        "arm": arm,
+        "seed": seed,
+        "attempt": attempt,
+        "video_delta_indices": delta,
+        "fixed_step_count": C.FIXED_STEP_COUNT,
+        "train_max_steps": args.max_steps or (
+            2 * C.TRAIN_MAX_STEPS if args.convergence_arm else C.TRAIN_MAX_STEPS
+        ),
+        "convergence_arm": bool(args.convergence_arm),
+        "dry_run": bool(args.dry_run),
+        "eval_list_sha256": eval_digest,
+        "notes": args.notes,
+        "status": "started",
+        "started_at_utc": P.utc_now(),
+        "argv": sys.argv,
+        "gate_script_sha256": P.sha256_file(os.path.abspath(__file__)),
+        "config_py_sha256": P.sha256_file(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.py")
+        ),
+        "preregistered_recipe": {
+            k: getattr(C, k)
+            for k in (
+                "TRAIN_MAX_STEPS", "GLOBAL_BATCH_SIZE", "GRADIENT_ACCUMULATION_STEPS",
+                "LEARNING_RATE", "WEIGHT_DECAY", "WARMUP_RATIO", "STATE_DROPOUT_PROB",
+                "NUM_GPUS", "SAVE_STEPS", "SAVE_TOTAL_LIMIT", "SHARD_SIZE",
+                "EPISODE_SAMPLING_RATE", "TUNE_LLM", "TUNE_VISUAL", "TUNE_PROJECTOR",
+                "TUNE_DIFFUSION_MODEL", "ALLOW_PADDING", "USE_MEAN_STD",
+                "USE_PERCENTILES", "MULTIPROCESSING_CONTEXT", "PREREGISTERED_SEEDS",
+                "LIBERO_SUITE", "EVAL_EPISODES_PER_TASK", "EVAL_SHARD_SIZE",
+                "MAX_EPISODE_STEPS", "N_ACTION_STEPS", "A40_USD_PER_HOUR",
+            )
+        },
+    }
+
+    def flush():
+        (run_dir / "run_manifest.json").write_text(
+            json.dumps(manifest, indent=2, sort_keys=True, default=str) + "\n"
+        )
+
+    # ---- stage 1: provenance, BEFORE anything heavy -------------------------
+    say("[1/6] capturing provenance (unrecoverable after the run)...")
+    manifest["provenance"] = P.collect(arm, seed, delta, {})
+    flush()
+
+    groot = manifest["provenance"]["isaac_groot"]
+    if not groot.get("matches_pin"):
+        msg = (f"installed Isaac-GR00T commit {groot.get('commit')} != pinned "
+               f"{C.GROOT_COMMIT}. Every file:line citation in this repo was read "
+               "at the pinned commit.")
+        if args.allow_commit_drift:
+            say("!! " + msg + "  (--allow-commit-drift given; recorded)")
+            manifest["commit_drift_accepted"] = msg
+        else:
+            manifest["status"] = "aborted"
+            flush()
+            die(msg + "\nPass --allow-commit-drift to proceed anyway.")
+    if groot.get("dirty"):
+        manifest["weirdness"] = "isaac-groot working tree dirty"
+        say("!! Isaac-GR00T working tree is DIRTY; recorded as weirdness.")
+
+    say("      instruction strings for the suite...")
+    manifest["provenance"]["libero_instructions"] = P.libero_instruction_strings(
+        C.LIBERO_SUITE
+    )
+    if eval_list:
+        manifest["provenance"]["eval_episode_seeds_hash"] = P.sha256_json(
+            {k: v["episode_seeds"] for k, v in eval_list["tasks"].items()}
+        )
+    flush()
+
+    # ---- stage 2: preflight ------------------------------------------------
+    say("[2/6] preflight -- the three landmines...")
+    import preflight
+
+    pre: dict = {}
+    manifest["preflight"] = pre
+    try:
+        say("      A. allow_padding must ARRIVE at extract_step_data")
+        pre["A_allow_padding"] = preflight.assert_padding_arrives(delta)
+        flush()
+
+        say("      C/D. processor: arm override + normalization mode in force")
+        processor = preflight.build_processor(delta)
+        pre["D_arm_override"] = preflight.assert_arm_override(processor, delta)
+        pre["C_normalization"] = preflight.record_normalization_mode(processor)
+        flush()
+
+        say("      B. dump the architecture that actually LOADED (issue #755)")
+        model = preflight.load_base_model(for_training=False)
+        pre["B_architecture"] = preflight.dump_architecture(model)
+        del model
+        try:
+            import torch
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+        flush()
+    except Exception as exc:
+        pre["failure"] = f"{type(exc).__name__}: {exc}"
+        pre["traceback"] = traceback.format_exc()
+        manifest["status"] = "preflight_failed"
+        flush()
+        record_attempt(arm, seed, attempt, "aborted",
+                       {"reason": "preflight", "run_dir": str(run_dir)})
+        die(f"PREFLIGHT FAILED:\n\n{traceback.format_exc()}")
+
+    say("      preflight PASSED:")
+    say(f"        allow_padding arrives : {pre['A_allow_padding']['verdict']}")
+    say(f"        loaded arch           : LLM="
+        f"{pre['B_architecture']['llm_layers_loaded']} "
+        f"DiT={pre['B_architecture']['dit_blocks_loaded']} "
+        f"(config.select_layer={pre['B_architecture'].get('config.select_layer')})")
+    say(f"        normalization         : "
+        f"{sorted(set(pre['C_normalization']['effective_mode_per_joint_group'].values()))}")
+    say(f"        arm delta_indices     : {pre['D_arm_override']['video_delta_indices']}")
+
+    if args.stage == "preflight":
+        manifest["status"] = "preflight_only"
+        flush()
+        return 0
+
+    # ---- stage 3: dry run ---------------------------------------------------
+    if args.dry_run:
+        say("[3/6] dry run -- timed forward+backward, then STOP (no training)")
+        manifest["throughput"] = timed_throughput(arm, seed)
+        manifest["status"] = "dry_run_complete"
+        manifest["wall_clock_hours"] = round((time.time() - t_start) / 3600, 3)
+        flush()
+        say(BANNER)
+        say("DRY RUN COMPLETE — nothing was trained.")
+        for k, v in manifest["throughput"].items():
+            say(f"  {k}: {v}")
+        say(BANNER)
+        record_attempt(arm, seed, attempt, "dry_run", {"run_dir": str(run_dir)})
+        return 0 if "ERROR" not in manifest["throughput"] else 3
+
+    # ---- stage 4: train -----------------------------------------------------
+    train_out = run_dir / "train"
+    if args.stage in ("all", "train"):
+        say("[4/6] training (subprocess)...")
+        cmd = [sys.executable, os.path.abspath(__file__),
+               "--arm", arm, "--seed", str(seed),
+               "--stage", "_train_worker",
+               "--run-dir", str(run_dir),
+               "--max-steps", str(manifest["train_max_steps"])]
+        t_train = time.time()
+        proc = subprocess.run(cmd, cwd=C.GROOT_REPO)
+        manifest["train_seconds"] = round(time.time() - t_train, 1)
+        div = scan_for_divergence(str(train_out))
+        manifest["divergence_scan"] = div
+        flush()
+
+        if div["diverged"]:
+            manifest["status"] = "diverged"
+            flush()
+            record_attempt(arm, seed, attempt, "diverged",
+                           {"run_dir": str(run_dir),
+                            "non_finite": div["non_finite_entries"][:5]})
+            say(BANNER)
+            say("RUN DIVERGED (non-finite loss).")
+            say("Per the pre-registration this run is RETAINED and REPORTED as a "
+                "failed run. It is NOT replaced by a rerun and NOT replaced by a "
+                "fresh seed. Report the divergence.")
+            say(BANNER)
+            say(results_log_line(manifest))
+            return 4
+
+        if proc.returncode != 0:
+            manifest["status"] = "crashed"
+            manifest["train_exit_code"] = proc.returncode
+            flush()
+            record_attempt(arm, seed, attempt, "crashed",
+                           {"run_dir": str(run_dir), "exit_code": proc.returncode})
+            say(BANNER)
+            say(f"TRAINING CRASHED (exit {proc.returncode}) with no non-finite loss "
+                "on record -- classified as infrastructure failure.")
+            say("The pre-registration permits exactly ONE exact-seed rerun. Re-run "
+                f"the identical command: --arm {arm} --seed {seed}")
+            say(BANNER)
+            return 5
+        say(f"      training finished in {manifest['train_seconds']/3600:.2f} h")
+        manifest["status"] = "trained"
+        flush()
+        if args.stage == "train":
+            record_attempt(arm, seed, attempt, "trained", {"run_dir": str(run_dir)})
+            say(f"stage=train only. Evaluate with:\n"
+                f"  python run_gate.py --arm {arm} --seed {seed} --stage eval "
+                f"--run-dir {run_dir}")
+            return 0
+
+    # ---- stage 5: eval at the fixed step ------------------------------------
+    if args.stage in ("all", "eval"):
+        if arm in C.ARMS_WITHOUT_CLOSED_LOOP_EVAL:
+            manifest["status"] = "trained_eval_blocked"
+            manifest["weirdness"] = (
+                f"{arm} cannot be closed-loop evaluated: video.delta_indices="
+                f"{delta} trips multistep_wrapper.py:279 "
+                "`assert (delta_indices[1] - delta_indices[0]) > 0`."
+            )
+            manifest["wall_clock_hours"] = round((time.time() - t_start) / 3600, 3)
+            flush()
+            record_attempt(arm, seed, attempt, "completed",
+                           {"run_dir": str(run_dir), "eval": "blocked"})
+            say(BANNER)
+            say(f"{arm} TRAINED. Closed-loop eval is NOT available for this arm.")
+            say("  MultiStepWrapper.assert_delta_indices requires a strictly "
+                "increasing delta list (multistep_wrapper.py:265-279); a repeated-"
+                "frame control is [0,0,...] and fails that assert at wrapper "
+                "construction.")
+            say("  Options, both of which must be pre-registered BEFORE they are "
+                "used: (a) evaluate this arm open-loop only, or (b) patch the "
+                "wrapper to accept a constant delta list and state the patch in "
+                "the paper. Do not improvise one after seeing results.")
+            say(BANNER)
+            say(results_log_line(manifest))
+            return 0
+
+        say(f"[5/6] evaluating ONLY at step {C.FIXED_STEP_COUNT}...")
+        ckpt = assert_only_fixed_step_used(str(train_out), C.FIXED_STEP_COUNT)
+        manifest["eval_primary"] = run_eval(ckpt, eval_list, run_dir, "primary")
+        flush()
+
+        if args.convergence_arm:
+            s2 = C.FIXED_STEP_COUNT * 2
+            ckpt2 = checkpoint_dir_for(str(train_out), s2)
+            if ckpt2.is_dir():
+                say(f"[5b/6] EXPLORATORY convergence-check eval at step {s2}")
+                manifest["eval_exploratory_2x"] = run_eval(
+                    ckpt2, eval_list, run_dir, "exploratory_2x"
+                )
+                manifest["eval_exploratory_2x"]["label_note"] = (
+                    "EXPLORATORY. ROUND 4 item 2 (under-training confound). This "
+                    "may not redefine the primary endpoint."
+                )
+            else:
+                say(f"!! convergence-arm requested but checkpoint-{s2} is absent")
+            flush()
+
+    # ---- stage 6: report ----------------------------------------------------
+    manifest["status"] = "completed"
+    manifest["finished_at_utc"] = P.utc_now()
+    hours = (time.time() - t_start) / 3600
+    manifest["wall_clock_hours"] = round(hours, 3)
+    manifest["estimated_cost_usd"] = round(hours * C.A40_USD_PER_HOUR, 2)
+    line = results_log_line(manifest)
+    manifest["results_log_line"] = line
+    flush()
+    (run_dir / "results.json").write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "arm": arm,
+                "seed": seed,
+                "attempt": attempt,
+                "status": manifest["status"],
+                "fixed_step_count": C.FIXED_STEP_COUNT,
+                "eval_list_sha256": eval_digest,
+                "preflight": manifest["preflight"],
+                "eval_primary": manifest.get("eval_primary"),
+                "eval_exploratory_2x": manifest.get("eval_exploratory_2x"),
+                "wall_clock_hours": manifest["wall_clock_hours"],
+                "estimated_cost_usd": manifest["estimated_cost_usd"],
+                "results_log_line": line,
+                "provenance_summary": {
+                    "isaac_groot_commit": manifest["provenance"]["isaac_groot"].get("commit"),
+                    "mujoco": manifest["provenance"]["libero_eval_env"].get("mujoco"),
+                    "torch": manifest["provenance"]["training_env"].get("torch"),
+                    "numpy": manifest["provenance"]["training_env"].get("numpy"),
+                    "libero_commit": manifest["provenance"]["libero_repo"].get("commit"),
+                },
+            },
+            indent=2, sort_keys=True, default=str,
+        )
+        + "\n"
+    )
+    record_attempt(arm, seed, attempt, "completed",
+                   {"run_dir": str(run_dir),
+                    "suite_sr": manifest.get("eval_primary", {}).get(
+                        "suite_success_rate_macro")})
+
+    say("")
+    say(BANNER)
+    say("[6/6] paste into #results-log:")
+    say("")
+    say(line)
+    say("")
+    say(f"full manifest : {run_dir/'run_manifest.json'}")
+    say(f"results json  : {run_dir/'results.json'}")
+    say(BANNER)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except KeyboardInterrupt:
+        say("\ninterrupted")
+        sys.exit(130)
