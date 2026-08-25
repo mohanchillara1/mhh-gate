@@ -36,21 +36,21 @@ git checkout -q $PIN || die "cannot checkout pin $PIN"
 stamp "✅ Isaac-GR00T at pin $PIN"
 
 # --- 2. install gr00t ----------------------------------------------------
-python -c "import gr00t" 2>/dev/null || {
+# NOTE: import gr00t succeeds from the repo dir even uninstalled (namespace pkg),
+# so gate on a real DEPENDENCY instead.
+if ! python -c "import huggingface_hub, transformers" 2>/dev/null; then
   say "pip install -e . (long)"
-  pip install -e . || die "gr00t install failed — see log above; likely dependency drift (torchcodec/torch pairing was the Kaggle failure)"
-}
-stamp "✅ gr00t importable"
+  pip install --break-system-packages -e . || die "gr00t install failed — see log above; likely dependency drift (torchcodec/torch pairing was the Kaggle failure)"
+fi
+python -c "import gr00t, huggingface_hub" || die "gr00t/huggingface_hub still not importable after install"
+stamp "✅ gr00t + deps installed and importable"
 
 # --- 3. gated-model access check (fail fast, before big downloads) -------
-python - <<'EOF' || die "HF access check failed — is GR00T-N1.7-3B (and Cosmos-Reason2-2B) granted on this account?"
-import os
-from huggingface_hub import HfApi
-api = HfApi(token=os.environ["HF_TOKEN"])
-for repo in ["nvidia/GR00T-N1.7-3B", "nvidia/Cosmos-Reason2-2B"]:
-    api.model_info(repo)  # raises if not accessible
-    print("access OK:", repo)
-EOF
+for repo in nvidia/GR00T-N1.7-3B nvidia/Cosmos-Reason2-2B; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $HF_TOKEN" "https://huggingface.co/api/models/$repo")
+  [ "$code" = "200" ] || die "HF access to $repo returned $code (need 200 — is it granted on this account?)"
+  say "access OK: $repo ($code)"
+done
 stamp "✅ HF access verified for both gated repos"
 
 # --- 4. LIBERO-Spatial data + modality patch ----------------------------
