@@ -83,6 +83,11 @@ if [ ! -f $DATA/meta/modality.json ]; then
 fi
 stamp "✅ LIBERO-Spatial data present, modality.json patched"
 
+# Headless EGL: the base image ships only the NVIDIA vendor ICD, not the GLVND
+# EGL frontend (libEGL.so.1). Without it MuJoCo/pyopengl EGL init returns None
+# ("'NoneType' object has no attribute 'eglQueryString'"). Install the frontend.
+apt-get install -y -qq libegl1 libgles2 libglvnd0 libopengl0 >/dev/null 2>&1 || true
+
 # --- 5. LIBERO simulator island -----------------------------------------
 if [ ! -d $GROOT_REPO/gr00t/eval/sim/LIBERO/.venv ] && ! ls $GROOT_REPO/gr00t/eval/sim/LIBERO/*venv* >/dev/null 2>&1; then
   say "running setup_libero.sh (long)"
