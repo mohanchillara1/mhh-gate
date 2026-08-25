@@ -83,6 +83,18 @@ if [ ! -f $DATA/meta/modality.json ]; then
 fi
 stamp "✅ LIBERO-Spatial data present, modality.json patched"
 
+# --- 4b. generate normalization stats.json -------------------------------
+# The IPEC-COMMUNITY LIBERO datasets are LeRobot v2.1 (per-episode
+# episodes_stats.jsonl) but GR00T's loader asserts the v2.0 aggregated
+# meta/stats.json (lerobot_episode_loader.py:180). GR00T ships the generator;
+# --embodiment-tag LIBERO_PANDA (value "libero_sim") matches config.EMBODIMENT_VALUE.
+if [ ! -f $DATA/meta/stats.json ]; then
+  say "generating stats.json (over parquet — a few min)"
+  ( cd $GROOT_REPO && $PY gr00t/data/stats.py --dataset-path $DATA --embodiment-tag LIBERO_PANDA ) || die "stats.json generation failed"
+fi
+[ -f $DATA/meta/stats.json ] || die "stats.json still missing after generation"
+stamp "✅ normalization stats.json generated"
+
 # Headless EGL: the base image ships only the NVIDIA vendor ICD, not the GLVND
 # EGL frontend (libEGL.so.1). Without it MuJoCo/pyopengl EGL init returns None
 # ("'NoneType' object has no attribute 'eglQueryString'"). Install the frontend.
