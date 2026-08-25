@@ -33,7 +33,12 @@ cd $GROOT_REPO
 git fetch -q origin
 git checkout -q $PIN || die "cannot checkout pin $PIN"
 [ "$(git rev-parse HEAD)" = "$PIN" ] || die "HEAD != pin"
-stamp "✅ Isaac-GR00T at pin $PIN"
+# The repo ships local wheels (torchcodec) via git-lfs. If cloned before git-lfs
+# was installed they are pointer stubs and uv sync dies ("Invalid zip file
+# structure" / header 0x73726576 = "vers" of a git-lfs pointer). Materialize them.
+apt-get install -y -qq git-lfs >/dev/null 2>&1; git lfs install >/dev/null 2>&1 || true
+git lfs pull || die "git lfs pull failed (needed for local torchcodec wheels)"
+stamp "✅ Isaac-GR00T at pin $PIN (lfs pulled)"
 
 # --- 2. install gr00t via uv (the REPO'S OWN installer) ------------------
 # VERIFIED at source (README): install is `uv sync --python 3.12`, NOT pip.
