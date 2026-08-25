@@ -35,15 +35,26 @@ git checkout -q $PIN || die "cannot checkout pin $PIN"
 [ "$(git rev-parse HEAD)" = "$PIN" ] || die "HEAD != pin"
 stamp "✅ Isaac-GR00T at pin $PIN"
 
-# --- 2. install gr00t ----------------------------------------------------
-# NOTE: import gr00t succeeds from the repo dir even uninstalled (namespace pkg),
-# so gate on a real DEPENDENCY instead.
-if ! python -c "import huggingface_hub, transformers" 2>/dev/null; then
-  say "pip install -e . (long)"
-  pip install --break-system-packages -e . || die "gr00t install failed — see log above; likely dependency drift (torchcodec/torch pairing was the Kaggle failure)"
+# --- 2. install gr00t via uv (the REPO'S OWN installer) ------------------
+# VERIFIED at source (README): install is `uv sync --python 3.12`, NOT pip.
+# pip ignores [tool.uv.sources], so it tries to BUILD flash-attn (needs torch
+# at build time) and fails; uv pulls the prebuilt torch2.9 flash-attn wheel.
+# uv sync creates $GROOT_REPO/.venv with torch 2.9.0 — ALL later python runs
+# use that venv, NOT the base image's torch 2.8.
+command -v uv >/dev/null || { curl -LsSf https://astral.sh/uv/install.sh | sh; export PATH="$HOME/.local/bin:$PATH"; }
+# prereqs the README names: git-lfs (demo parquet) + ffmpeg (torchcodec backend).
+# ubuntu2404 ships ffmpeg 6 → in torchcodec's supported 4-7 range.
+say "apt prereqs: git-lfs, ffmpeg"
+apt-get update -qq && apt-get install -y -qq git-lfs ffmpeg >/dev/null 2>&1
+git lfs install >/dev/null 2>&1 || true
+VENV=$GROOT_REPO/.venv
+if [ ! -x $VENV/bin/python ] || ! $VENV/bin/python -c "import gr00t, flash_attn" 2>/dev/null; then
+  say "uv sync --python 3.12 (long — builds venv, torch 2.9, flash-attn)"
+  ( cd $GROOT_REPO && uv sync --python 3.12 ) || die "uv sync failed — see log above"
 fi
-python -c "import gr00t, huggingface_hub" || die "gr00t/huggingface_hub still not importable after install"
-stamp "✅ gr00t + deps installed and importable"
+PY=$VENV/bin/python
+$PY -c "import gr00t, flash_attn, huggingface_hub, torch; print('torch', torch.__version__, 'cuda', torch.cuda.is_available())" || die "gr00t venv incomplete after uv sync"
+stamp "✅ gr00t installed via uv sync; venv=$VENV"
 
 # --- 3. gated-model access check (fail fast, before big downloads) -------
 for repo in nvidia/GR00T-N1.7-3B nvidia/Cosmos-Reason2-2B; do
@@ -57,7 +68,7 @@ stamp "✅ HF access verified for both gated repos"
 DATA=$GROOT_REPO/examples/LIBERO/libero_spatial_no_noops_1.0.0_lerobot
 if [ ! -f $DATA/meta/modality.json ]; then
   say "downloading LIBERO-Spatial dataset"
-  hf download --repo-type dataset IPEC-COMMUNITY/libero_spatial_no_noops_1.0.0_lerobot \
+  $VENV/bin/hf download --repo-type dataset IPEC-COMMUNITY/libero_spatial_no_noops_1.0.0_lerobot \
       --local-dir $DATA --token $HF_TOKEN || die "dataset download failed"
   cp $GROOT_REPO/examples/LIBERO/modality.json $DATA/meta/ || die "modality patch copy failed"
 fi
@@ -75,7 +86,7 @@ mkdir -p $MHH_RUNS_DIR $W/logs
 cd $W/mhh-gate
 for ARM in T1 T5; do
   say "dry run $ARM seed 11"
-  python run_gate.py --arm $ARM --seed 11 --dry-run 2>&1 | tee $W/logs/dryrun_${ARM}_s11.log
+  $PY run_gate.py --arm $ARM --seed 11 --dry-run 2>&1 | tee $W/logs/dryrun_${ARM}_s11.log
   RC=${PIPESTATUS[0]}
   if [ $RC -eq 0 ]; then stamp "✅ dry run $ARM PASSED — timing in logs/dryrun_${ARM}_s11.log"
   else stamp "❌ dry run $ARM FAILED (rc=$RC) — see logs/dryrun_${ARM}_s11.log"; fi
