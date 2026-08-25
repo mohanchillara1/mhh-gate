@@ -452,7 +452,7 @@ def timed_throughput(arm: str, seed: int) -> dict:
     # embodiment); the real pipeline injects dataset stats via set_statistics
     # (setup.py:189 -> processing_gr00t_n1d7.py:345). Mirror it here or state
     # normalization KeyErrors on 'libero_sim' at the first batch.
-    processor.set_statistics(ds.get_dataset_statistics())
+    processor.set_statistics({C.EMBODIMENT_VALUE: ds.get_dataset_statistics()})  # shape per sharded_mixture_dataset.py:299
     shard = ds.get_shard(0)
     if len(shard) < C.GLOBAL_BATCH_SIZE:
         return {"error": f"shard has {len(shard)} datapoints, need "
