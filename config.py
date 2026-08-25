@@ -32,7 +32,7 @@ import os
 #         * FIXED_STEP_COUNT % SAVE_STEPS == 0     (else checkpoint-S never exists)
 #         * FIXED_STEP_COUNT <= TRAIN_MAX_STEPS
 #         * SAVE_TOTAL_LIMIT is large enough that checkpoint-S is not evicted
-FIXED_STEP_COUNT: int | None = None          # e.g. 6000
+FIXED_STEP_COUNT: int | None = 6000          # FROZEN 2026-08-24 (dad in chat; = TRAIN_MAX_STEPS, only other legal value was 5000)
 
 # (2/2) sha256 of the frozen eval-episode file (eval_episodes.json).
 #       The file pins, per task, the list of reset seeds used for evaluation.
@@ -40,7 +40,7 @@ FIXED_STEP_COUNT: int | None = None          # e.g. 6000
 #       once with:   python run_gate.py --make-eval-list
 #       then paste the printed digest here.  run_gate.py re-hashes the file on
 #       every run and hard-fails on mismatch, so the list cannot drift.
-EVAL_EPISODE_LIST_SHA256: str | None = None  # e.g. "3f2a...  (64 hex chars)"
+EVAL_EPISODE_LIST_SHA256: str | None = "d51371a59be544a0d26f4a0f27171fd0d65d39bb94cadf1b2635de67f3b61663"  # FROZEN 2026-08-24
 
 EVAL_EPISODE_LIST_PATH = os.path.join(os.path.dirname(__file__), "eval_episodes.json")
 
