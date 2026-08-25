@@ -126,7 +126,7 @@ STATE_DROPOUT_PROB = 0.2        # what NVIDIA used for all four LIBERO suites
 NUM_GPUS = 1
 DATALOADER_NUM_WORKERS = 2
 SAVE_STEPS = 1000
-SAVE_TOTAL_LIMIT = 20           # must not evict checkpoint-FIXED_STEP_COUNT
+SAVE_TOTAL_LIMIT = 2            # 24GB per checkpoint; keep last+newest only. S=6000 is the final save so it always survives (run_gate asserts this).
 SHARD_SIZE = 1024               # data_config.py:76
 EPISODE_SAMPLING_RATE = 0.1     # data_config.py:77
 TUNE_LLM = False
