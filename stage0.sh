@@ -10,6 +10,10 @@ export GROOT_REPO=$W/Isaac-GR00T
 export MHH_RUNS_DIR=$W/mhh-runs
 export HF_HOME=$W/hf
 export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
+# /workspace is a FUSE (fuseblk) volume; HuggingFace's parallel Xet backend trips
+# its file locks ("OSError: [Errno 9] Bad file descriptor" in filelock). Disable
+# Xet + hf_transfer → plain sequential downloads that the FUSE mount handles fine.
+export HF_HUB_DISABLE_XET=1 HF_HUB_ENABLE_HF_TRANSFER=0
 PIN=51d4c89f72fda44cbf77285c6a8114b52676b8a1
 STATUS=$W/STATUS.md
 
