@@ -53,7 +53,14 @@ def build_modality_configs(delta_indices: list[int]) -> dict:
         )
     cfgs = copy.deepcopy(MODALITY_CONFIGS)
     cfgs[C.EMBODIMENT_VALUE]["video"].delta_indices = list(delta_indices)
-    return cfgs
+    # Pass ONLY our embodiment. The full code-side dict includes embodiments the
+    # CHECKPOINT does not carry (e.g. unitree_g1_..._nav_cmd, action horizon 50);
+    # the from_pretrained hook MERGES overrides over the checkpoint's configs and
+    # __init__ validates every entry against the serialized ceiling (40), so
+    # passing the full dict crashes: "Embodiment action horizon exceeds
+    # max_action_horizon (40): unitree_...=50". The smoke test's pattern
+    # (modality_configs={"libero_sim": cfg}) passed on live weights 2026-08-23.
+    return {C.EMBODIMENT_VALUE: cfgs[C.EMBODIMENT_VALUE]}
 
 
 # ---------------------------------------------------------------------------
