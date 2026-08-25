@@ -448,6 +448,11 @@ def timed_throughput(arm: str, seed: int) -> dict:
         allow_padding=C.ALLOW_PADDING,
     )
     ds.processor = processor
+    # The checkpoint's statistics.json has no libero_sim entry (fine-tune
+    # embodiment); the real pipeline injects dataset stats via set_statistics
+    # (setup.py:189 -> processing_gr00t_n1d7.py:345). Mirror it here or state
+    # normalization KeyErrors on 'libero_sim' at the first batch.
+    processor.set_statistics(ds.get_dataset_statistics())
     shard = ds.get_shard(0)
     if len(shard) < C.GLOBAL_BATCH_SIZE:
         return {"error": f"shard has {len(shard)} datapoints, need "
