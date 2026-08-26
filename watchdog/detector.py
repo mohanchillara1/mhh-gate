@@ -193,3 +193,41 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def clear_resolved():
+    """Auto-archive flags whose condition is now demonstrably false (move, never delete)."""
+    import shutil
+    ticks = tail_ticks(6)
+    if not ticks:
+        return
+    cur = ticks[-1]
+    train = v(cur, "train") or {}
+    log = v(cur, "log") or {}
+    alive = bool(train.get("alive"))
+    utils = [(v(t, "gpu") or {}).get("util_pct") for t in ticks[-3:]]
+    busy = any(u for u in utils if u)
+    log_fresh = log.get("mtime_epoch") and (time.time() - log["mtime_epoch"] < 300)
+    fracs = [((v(t, "gpu") or {}).get("mem_used_mb") or 0) / ((v(t, "gpu") or {}).get("mem_total_mb") or 1) for t in ticks[-3:]]
+    resolved = []
+    if alive:
+        resolved.append("PROC_GONE")
+    if busy:
+        resolved.append("STALL")
+    if log_fresh:
+        resolved.append("LOG_FROZEN")
+    if fracs and max(fracs) < 0.90:
+        resolved.append("OOM_RISK")
+    try:
+        s = json.load(open(f"{W}/flags/.volume_used_sample.json"))
+        if 150 - s["used_bytes"]/1e9 >= 25:
+            resolved.append("DISK_LOW")
+    except Exception:
+        pass
+    os.makedirs(f"{W}/archive/stale-flags", exist_ok=True)
+    for name in resolved:
+        p = f"{FLAGS}/{name}"
+        if os.path.exists(p):
+            shutil.move(p, f"{W}/archive/stale-flags/{name}.cleared.{int(time.time())}")
+            print(f"CLEARED {name} (condition no longer true)")
+
+clear_resolved()
