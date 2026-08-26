@@ -126,7 +126,7 @@ STATE_DROPOUT_PROB = 0.2        # what NVIDIA used for all four LIBERO suites
 NUM_GPUS = 1
 DATALOADER_NUM_WORKERS = 2
 SAVE_STEPS = 1000
-SAVE_TOTAL_LIMIT = 2            # 24GB per checkpoint; keep last+newest only. S=6000 is the final save so it always survives (run_gate asserts this).
+SAVE_TOTAL_LIMIT = 1            # QUOTA-ENFORCED 150GB volume: limit 2 gave a 72GB rotation peak that killed T5 att1 mid-save. Limit 1 -> peak 48GB. S=6000 is the final save so it always survives.
 SHARD_SIZE = 1024               # data_config.py:76
 EPISODE_SAMPLING_RATE = 0.1     # data_config.py:77
 TUNE_LLM = False
