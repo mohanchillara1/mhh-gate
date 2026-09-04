@@ -240,6 +240,7 @@ used**, not chosen after seeing a number.
 | `provenance.py` | environment/version/instruction capture (nothing here can fail a run) |
 | `eval_episodes.json` | the frozen 200-episode evaluation set — hash-checked on every run |
 | `MANIFEST.md` | **what is verified and what is not.** Read it before believing anything here works. |
+| `history_gate.py` | transition-gated history — **prototype, unevaluated.** See below. |
 
 ## Outputs, per run
 
@@ -253,3 +254,34 @@ $MHH_RUNS_DIR/attempts.json   the crash-policy ledger
 ```
 
 Nothing in `run_manifest.json` is a result until the run reaches `status: completed`.
+
+---
+
+## `history_gate.py` — transition-gated history (prototype, not a result)
+
+The LIBERO-Long probe found the five-frame penalty is not spread evenly. It concentrates in
+multi-stage tasks that require a sharp switch between qualitatively different actions, and every
+failed episode ran to the full 720-step limit while successful ones finished in roughly 200–375
+steps. The policy does not break down early; it reaches a transition, keeps producing behaviour
+associated with the preceding action, and times out. That is consistent with copycat / causal
+confusion (de Haan et al.; Wen et al.).
+
+If history helps *within* a phase and hurts *across* a boundary, gate it on the boundary instead
+of removing it globally:
+
+```python
+from history_gate import TransitionGatedHistory, calibrate_tau
+
+gate = TransitionGatedHistory(history_len=5, tau=0.06, hold_steps=3)
+gate.reset()
+window = gate.step(frame)   # full history, or [frame] during a transition
+```
+
+`calibrate_tau(episodes, quantile=0.98)` picks the threshold from held-out frame distances rather
+than by hand.
+
+**Status, stated plainly:** implemented and unit-tested on synthetic phase-transition sequences,
+CPU only. **Not wired into the GR00T eval path. Not evaluated on LIBERO. It has never produced a
+success-rate number.** The falsifiable prediction — that gating recovers multi-stage performance
+toward single-frame levels at transitions while leaving smooth tasks unchanged — is stated in
+advance precisely so it can fail. Do not cite this file as a result.
