@@ -19,10 +19,64 @@ one place the card asks for something the GR00T code cannot do, which is flagged
 
 ---
 
-## Before the first run: two values a human must set
+## Quickstart — three things you can check in two minutes, with no GPU
 
-Both live in `config.py`, both are `None`, and the script refuses to start without
-them. That is deliberate — a default here is a post-hoc degree of freedom.
+The experiment itself needs an A40 and a LIBERO install. **These three do not**, and
+between them they cover most of what the papers claim.
+
+```bash
+git clone https://github.com/mohanchillara1/mhh-gate.git && cd mhh-gate
+
+# 1. Is the pre-registered episode list really frozen? (needs nothing but python3)
+python3 -c "import hashlib; print(hashlib.sha256(open('eval_episodes.json','rb').read()).hexdigest())"
+# expect: d51371a59be544a0d26f4a0f27171fd0d65d39bb94cadf1b2635de67f3b61663
+# which is the value committed in config.py as EVAL_EPISODE_LIST_SHA256.
+# One changed byte in eval_episodes.json aborts every run. That is the whole idea.
+
+# 2. Does the frame-history loader bug reproduce?   (needs numpy + pandas)
+python3 demo/loader_bug_demo.py
+# prints, for step 0 of a five-frame arm:
+#   allow_padding=False  indices -> [-4, -3, -2, -1, 0]
+#                        frames  -> [16.0, 17.0, 18.0, 19.0, 0.0]   <- the END of the episode
+#   allow_padding=True   indices -> [0, 0, 0, 0, 0]
+#                        frames  -> [0.0, 0.0, 0.0, 0.0, 0.0]
+
+# 3. Do the paper's statistics come out of the published table?   (scipy optional)
+python3 demo/paper_stats.py
+# prints: -2.50 pp, 95% CI [-6.36, +1.36], t(9) = -1.464, p = 0.177
+#         Holm p = 1.000 on both discordant tasks. Nothing survives correction.
+```
+
+The harness self-check is one more command, and it does need Isaac-GR00T installed at
+the pinned commit:
+
+```bash
+python run_gate.py --arm T1 --seed 11 --dry-run
+```
+
+It writes to `./mhh-runs` by default; set `MHH_RUNS_DIR` to move that. If Isaac-GR00T
+is not present at the pinned commit it aborts and says so, which is the harness
+working, not failing.
+
+**Pinned versions** are in `requirements.txt`, including which ones belong to the
+separate LIBERO simulator venv rather than this one.
+
+---
+
+## The two values that had to be set by hand — both frozen 2026-08-24
+
+**These are already set and committed.** They were `None` by design until a human chose
+them, because a default here is a post-hoc degree of freedom. That choice has been made
+and frozen, so this section is now about *verifying* them rather than setting them:
+
+```
+FIXED_STEP_COUNT          = 6000                       # config.py, FROZEN 2026-08-24
+EVAL_EPISODE_LIST_SHA256  = "d51371a5…f3b61663"         # config.py, FROZEN 2026-08-24
+```
+
+Check the digest yourself with the one-liner in the Quickstart above. If you are
+starting a *new* experiment rather than reproducing this one, set both back to `None`
+and read the rest of this section, which explains what each has to satisfy.
 
 ### 1. `FIXED_STEP_COUNT`
 
