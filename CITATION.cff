@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this harness, please cite it."
+title: "mhh-gate: an executable pre-registration harness for frame-history experiments on GR00T N1.7"
+abstract: >-
+  A gate runner that turns a pre-registration into code. Every guarantee a fair
+  comparison depends on is asserted at the point it could fail silently, and a
+  violation aborts the run rather than printing a warning: the wrong checkpoint
+  aborts, an edited episode list aborts because the list is hashed at
+  pre-registration time, no best-checkpoint selection exists anywhere in the
+  codebase, and extra episodes from unseeded autoreset are flagged per task
+  rather than folded into an aggregate.
+authors:
+  - family-names: Chillara
+    given-names: Mohan
+repository-code: "https://github.com/mohanchillara1/mhh-gate"
+type: software
+keywords:
+  - reproducibility
+  - pre-registration
+  - vision-language-action
+  - LIBERO
+  - robot learning

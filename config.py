@@ -245,7 +245,14 @@ EVAL_LIST_MASTER_SEED = 20260823
 # ---------------------------------------------------------------------------
 # ============ 7. Bookkeeping
 # ---------------------------------------------------------------------------
-RUNS_DIR = os.environ.get("MHH_RUNS_DIR", "/workspace/mhh-runs")
+# Default to a directory inside the repo rather than /workspace. The pod layout is
+# still what the README documents and MHH_RUNS_DIR still overrides this, but a reader
+# who runs the advertised `--dry-run` on their own machine used to get
+#   PermissionError: [Errno 13] Permission denied: '/workspace'
+# out of run_gate.py:965 before the harness could say anything useful. A cheap
+# self-check should not require a RunPod pod. (Cold repro audit, 2026-09-22.)
+_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+RUNS_DIR = os.environ.get("MHH_RUNS_DIR") or os.path.join(_REPO_ROOT, "mhh-runs")
 A40_USD_PER_HOUR = 0.44         # RunPod community-cloud list price, 2026-08.
                                 # Estimate only; the manifest records the value
                                 # used so the cost line is auditable.

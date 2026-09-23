@@ -1,0 +1,26 @@
+# Pinned to the stack the papers report. Added 2026-09-22 after a cold reproducibility
+# audit found the repo pinned nothing while the papers named exact versions.
+#
+# Two environments are involved and they are deliberately separate:
+#
+#   (1) THIS FILE — the trainer/eval side, which imports gr00t and torch.
+#   (2) The LIBERO simulator island, a SEPARATE uv venv created by
+#       gr00t/eval/sim/LIBERO/setup_libero.sh. MuJoCo lives there, not here.
+#       See README "the LIBERO simulator island".
+#
+# Isaac-GR00T itself is NOT pinned here because it is installed from source at a
+# pinned commit and run_gate.py aborts on any other commit:
+#   git clone https://github.com/NVIDIA/Isaac-GR00T
+#   git -C Isaac-GR00T checkout 51d4c89f72fda44cbf77285c6a8114b52676b8a1
+#   pip install -e Isaac-GR00T
+#
+# Python 3.11 is what the determinism gate pins and what these versions were
+# exercised on. Python 3.13 will not resolve robosuite 1.4.0 / gym 0.25.2.
+
+numpy==1.26.4
+
+# --- simulator island (install in the LIBERO venv, not this one) ------------
+# robosuite==1.4.0
+# bddl==1.0.1
+# gym==0.25.2
+# mujoco<3.2
