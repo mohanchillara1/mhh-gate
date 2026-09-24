@@ -339,3 +339,14 @@ CPU only. **Not wired into the GR00T eval path. Not evaluated on LIBERO. It has 
 success-rate number.** The falsifiable prediction — that gating recovers multi-stage performance
 toward single-frame levels at transitions while leaving smooth tasks unchanged — is stated in
 advance precisely so it can fail. Do not cite this file as a result.
+
+---
+
+## License
+
+Apache License 2.0. See [`LICENSE`](LICENSE). Copyright 2026 Mohan Chillara.
+
+The harness imports NVIDIA's Isaac-GR00T at runtime (itself Apache-2.0) and does not
+redistribute any of its files, so there is no `NOTICE` to carry. `demo/loader_bug_demo.py`
+re-expresses one indexing expression from `sharded_single_step_dataset.py:40-42` to show the
+bug, and cites it by path and line.
