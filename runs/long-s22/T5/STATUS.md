@@ -32,3 +32,4 @@ OVERLAY OK: 10 Long tasks, 200 seeded episodes, sha 5c1fcaa8d90d..., builder rep
 - 2026-09-29 21:52 UTC — heartbeat: {"log_bytes": 360087, "log_mtime": 1790718718.0, "phase": "train", "step": 5239, "s_per_it": 7.1, "s_per_it_avg": 7.542, "at_utc": "2026-09-29T21:52:01Z"}
 - 2026-09-29 22:52 UTC — heartbeat: {"log_bytes": 393355, "log_mtime": 1790722332.0, "phase": "train", "step": 5731, "s_per_it": 7.17, "s_per_it_avg": 7.525, "at_utc": "2026-09-29T22:52:18Z"}
 - 2026-09-29 23:27 UTC — ✅ TRAINING DONE (checkpoint-6000), eval started
+- 2026-09-29 23:52 UTC — heartbeat: {"log_bytes": 507272, "log_mtime": 1790725822.0, "phase": "eval", "shards_started": 4, "tasks_done": [], "at_utc": "2026-09-29T23:52:38Z"}
