@@ -25,10 +25,11 @@ import urllib.request
 GRAPHQL = "https://api.runpod.io/graphql"
 
 # Planning rates if the log has no tqdm rate yet (measured on A40, Plan -- Staged Gate Runs.md).
-DEFAULT_S_PER_IT = {"T1": 3.2, "T5": 8.5}
+# Seed-22 measurements (2026-09-29): T1 3.04-3.49 s/it; T5 attempt 1 hourly 6.93-7.36, whole-run 7.68 incl. model load.
+DEFAULT_S_PER_IT = {"T1": 3.2, "T5": 7.3}
 EVAL_SHARDS = 40                      # 10 tasks x 4 shards of 5
 DEFAULT_EVAL_H = 6.0                  # T5 Long eval on osmesa took 5.97 h (seed 21)
-SETUP_H = 1.5                         # clone + uv sync + downloads + LIBERO island + dry run
+SETUP_H = 0.75                        # clone + uv sync + downloads + LIBERO island + dry run; measured 0.5 h on 09-29
 FLOOR_USD = 1.50                      # hard floor, as in every earlier chain
 MARGIN = 1.15                         # projection must clear need x 1.15
 
