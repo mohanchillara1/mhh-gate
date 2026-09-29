@@ -28,7 +28,7 @@ GRAPHQL = "https://api.runpod.io/graphql"
 # Seed-22 measurements (2026-09-29): T1 3.04-3.49 s/it; T5 attempt 1 hourly 6.93-7.36, whole-run 7.68 incl. model load.
 DEFAULT_S_PER_IT = {"T1": 3.2, "T5": 7.3}
 EVAL_SHARDS = 40                      # 10 tasks x 4 shards of 5
-DEFAULT_EVAL_H = 6.0                  # T5 Long eval on osmesa took 5.97 h (seed 21)
+DEFAULT_EVAL_H = 5.5                  # seed 21 T5: 5.97 h; seed 22 T1 measured ~7.5 min/shard x 40 = 5.0 h (96 vCPU)
 SETUP_H = 0.75                        # clone + uv sync + downloads + LIBERO island + dry run; measured 0.5 h on 09-29
 FLOOR_USD = 1.50                      # hard floor, as in every earlier chain
 MARGIN = 1.15                         # projection must clear need x 1.15
@@ -121,7 +121,14 @@ def need(log: str, arm: str, eval_h: float = DEFAULT_EVAL_H) -> dict:
     # arm's planned hours (set per pod at creation). Unset -> the old upper bound: everything bills for h.
     # Option A pods are identical, so this pod's share of the spend is spend / n_running.
     own = b["spend_per_hr"] / b["n_running"]
-    other_h = float(os.environ.get("MHH_OTHER_H", h))
+    # The other pod's remaining hours must COUNT DOWN. A static MHH_OTHER_H kept charging T5 for 7.5 h of T1 all
+    # morning and was minutes from a false stop (2026-09-29 08:16 CT). /workspace/OTHER_UNTIL (epoch s) wins.
+    ou = os.path.join(os.environ.get("MHH_W", "/workspace"), "OTHER_UNTIL")
+    if os.path.exists(ou):
+        other_h = max(0.0, (float(open(ou).read().strip()) - time.time()) / 3600)
+    else:
+        other_h = float(os.environ.get("MHH_OTHER_H", h))
+    p["other_h"] = round(other_h, 2)
     usd = own * h + (b["spend_per_hr"] - own) * min(h, other_h)
     p.update(balance=b["balance"], spend_per_hr=b["spend_per_hr"], usd_needed=round(usd, 2))
     if b["balance"] <= FLOOR_USD:
