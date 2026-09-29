@@ -1,1 +1,3 @@
 - 2026-09-29 04:32 UTC — chain.sh started: arm=T5 seed=22 mock=0 pod=0kd7vf7v5cehfu
+- 2026-09-29 04:32 UTC — balance preflight: {"phase": "not_started", "hours_left": 21.67, "balance_error": "HTTPError: HTTP Error 403: Forbidden", "verdict": "BLIND", "at_utc": "2026-09-29T04:32:22Z"}
+- 2026-09-29 04:32 UTC — ❌ FATAL: balance unreadable (RUNPOD_ACCOUNT_KEY?) and MHH_ALLOW_BALANCE_BLIND!=1
