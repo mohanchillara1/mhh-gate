@@ -1,0 +1,11 @@
+{
+  "T1/seed22": [
+    {
+      "attempt": 1,
+      "recorded_at_utc": "2026-09-29T15:25:07+00:00",
+      "run_dir": "/workspace/mhh-long-runs/T1_seed22_att1",
+      "status": "completed",
+      "suite_sr": 0.99
+    }
+  ]
+}
