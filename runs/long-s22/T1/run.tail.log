@@ -1,5 +1,3 @@
-{'loss': 0.1326, 'grad_norm': 0.3323472738265991, 'learning_rate': 7.549949567999345e-05}
-{'loss': 0.1186, 'grad_norm': 0.3695850968360901, 'learning_rate': 7.526206252777968e-05}
 {'loss': 0.1315, 'grad_norm': 0.40101924538612366, 'learning_rate': 7.50238619827301e-05}
 {'loss': 0.1302, 'grad_norm': 0.4548720121383667, 'learning_rate': 7.478490128073022e-05}
 {'loss': 0.1337, 'grad_norm': 0.3596144914627075, 'learning_rate': 7.454518768075704e-05}
@@ -398,3 +396,5 @@ Copying wandb_config.json from /workspace/mhh-long-runs/T1_seed22_att1/train/wan
       training finished in 5.86 h
 [5/6] evaluating ONLY at step 6000...
 [eval] starting policy server: /workspace/Isaac-GR00T/.venv/bin/python /workspace/Isaac-GR00T/gr00t/eval/run_gr00t_server.py --model-path /workspace/mhh-long-runs/T1_seed22_att1/train/checkpoint-6000 --embodiment-tag LIBERO_PANDA --host 0.0.0.0 --port 5555 --use-sim-policy-wrapper
+[eval] server bound on port 5555
+[eval] libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it shard base_seed=20460823
