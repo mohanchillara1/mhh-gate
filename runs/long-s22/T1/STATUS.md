@@ -1,1 +1,5 @@
 - 2026-09-29 05:14 UTC — chain.sh started: arm=T1 seed=22 mock=0 pod=santb25w2jrbls
+- 2026-09-29 05:14 UTC — balance preflight: {"phase": "not_started", "hours_left": 12.83, "balance": 24.6035287846, "spend_per_hr": 1.033, "usd_needed": 13.26, "verdict": "OK", "at_utc": "2026-09-29T05:14:48Z"}
+- 2026-09-29 05:14 UTC — setup started
+- 2026-09-29 05:18 UTC — REPAIR: setup hung (apt stopped by SIGTTOU under tmux+timeout); chain SIGKILLed before any run, relaunched on the no-tty fix
+- 2026-09-29 05:18 UTC — chain.sh started: arm=T1 seed=22 mock=0 pod=santb25w2jrbls
