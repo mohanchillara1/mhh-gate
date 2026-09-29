@@ -1,15 +1,3 @@
-{'loss': 0.1315, 'grad_norm': 0.40101924538612366, 'learning_rate': 7.50238619827301e-05}
-{'loss': 0.1302, 'grad_norm': 0.4548720121383667, 'learning_rate': 7.478490128073022e-05}
-{'loss': 0.1337, 'grad_norm': 0.3596144914627075, 'learning_rate': 7.454518768075704e-05}
-{'loss': 0.1283, 'grad_norm': 0.35879242420196533, 'learning_rate': 7.430472846465856e-05}
-{'loss': 0.1247, 'grad_norm': 0.35896220803260803, 'learning_rate': 7.406353093693253e-05}
-{'loss': 0.1196, 'grad_norm': 0.34089407324790955, 'learning_rate': 7.382160242450469e-05}
-{'loss': 0.1181, 'grad_norm': 0.383242666721344, 'learning_rate': 7.357895027650598e-05}
-{'loss': 0.127, 'grad_norm': 0.3952726423740387, 'learning_rate': 7.333558186404958e-05}
-{'loss': 0.1307, 'grad_norm': 0.4630942642688751, 'learning_rate': 7.309150458000668e-05}
-{'loss': 0.129, 'grad_norm': 0.3719029724597931, 'learning_rate': 7.284672583878219e-05}
-{'loss': 0.1241, 'grad_norm': 0.5070878863334656, 'learning_rate': 7.260125307608929e-05}
-{'loss': 0.1235, 'grad_norm': 0.34450849890708923, 'learning_rate': 7.235509374872373e-05}
 {'loss': 0.1223, 'grad_norm': 0.5469109416007996, 'learning_rate': 7.210825533433719e-05}
 {'loss': 0.1278, 'grad_norm': 0.3336056172847748, 'learning_rate': 7.186074533121013e-05}
 {'loss': 0.1231, 'grad_norm': 0.386915385723114, 'learning_rate': 7.161257125802413e-05}
@@ -398,3 +386,15 @@ Copying wandb_config.json from /workspace/mhh-long-runs/T1_seed22_att1/train/wan
 [eval] starting policy server: /workspace/Isaac-GR00T/.venv/bin/python /workspace/Isaac-GR00T/gr00t/eval/run_gr00t_server.py --model-path /workspace/mhh-long-runs/T1_seed22_att1/train/checkpoint-6000 --embodiment-tag LIBERO_PANDA --host 0.0.0.0 --port 5555 --use-sim-policy-wrapper
 [eval] server bound on port 5555
 [eval] libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it shard base_seed=20460823
+[eval] libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it shard base_seed=20460828
+[eval] libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it shard base_seed=20460833
+[eval] libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it shard base_seed=20460838
+[eval] libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it: 20/20
+[eval] libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it shard base_seed=20560823
+[eval] libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it shard base_seed=20560828
+[eval] libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it shard base_seed=20560833
+[eval] libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it shard base_seed=20560838
+[eval] libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it: 20/20
+[eval] libero_sim/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it shard base_seed=21160823
+[eval] libero_sim/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it shard base_seed=21160828
+[eval] libero_sim/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it shard base_seed=21160833
