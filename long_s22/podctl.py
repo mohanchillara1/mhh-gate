@@ -50,12 +50,14 @@ def _gql(query: str) -> dict:
 def balance() -> dict:
     if os.environ.get("MHH_MOCK_BALANCE"):
         v = os.environ["MHH_MOCK_BALANCE"]            # "40,0.74" or "@file" holding that (local tests)
-        b, s = (open(v[1:]).read() if v.startswith("@") else v).strip().split(",")
-        return {"balance": float(b), "spend_per_hr": float(s)}
-    r = _gql("query { myself { clientBalance currentSpendPerHr } }")
+        f = (open(v[1:]).read() if v.startswith("@") else v).strip().split(",")
+        return {"balance": float(f[0]), "spend_per_hr": float(f[1]), "n_running": int(f[2]) if len(f) > 2 else 1}
+    r = _gql("query { myself { clientBalance currentSpendPerHr pods { desiredStatus } } }")
     try:
         me = r["data"]["myself"]
-        return {"balance": float(me["clientBalance"]), "spend_per_hr": float(me["currentSpendPerHr"])}
+        n = sum(1 for x in (me.get("pods") or []) if x.get("desiredStatus") == "RUNNING")
+        return {"balance": float(me["clientBalance"]), "spend_per_hr": float(me["currentSpendPerHr"]),
+                "n_running": max(1, n)}
     except Exception:
         return {"error": r.get("error") or json.dumps(r)[:300]}
 
@@ -103,8 +105,12 @@ def need(log: str, arm: str, eval_h: float = DEFAULT_EVAL_H) -> dict:
     if "error" in b:
         p.update(balance_error=b["error"], verdict="BLIND")
         return p
-    # Upper bound: every pod on the account keeps billing until THIS arm is done.
-    usd = h * b["spend_per_hr"]
+    # This pod bills for all h hours. The other running pod(s) bill for at most min(h, MHH_OTHER_H), the other
+    # arm's planned hours (set per pod at creation). Unset -> the old upper bound: everything bills for h.
+    # Option A pods are identical, so this pod's share of the spend is spend / n_running.
+    own = b["spend_per_hr"] / b["n_running"]
+    other_h = float(os.environ.get("MHH_OTHER_H", h))
+    usd = own * h + (b["spend_per_hr"] - own) * min(h, other_h)
     p.update(balance=b["balance"], spend_per_hr=b["spend_per_hr"], usd_needed=round(usd, 2))
     if b["balance"] <= FLOOR_USD:
         p["verdict"] = "STOP_FLOOR"

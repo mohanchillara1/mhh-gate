@@ -27,8 +27,9 @@ After that the laptop can close. Progress is on GitHub, branch `runs/long-s22-T5
 
 ## Guard rules
 
-- Balance preflight must cover the whole arm, with every pod on the account billing until this arm ends
-  (an upper bound), ×1.15, plus a $1.50 floor. Checked every 10 min after that. Short → push, stop.
+- Balance preflight must cover the whole arm: this pod's rate × its hours, plus the other pod's rate ×
+  min(its hours, `MHH_OTHER_H`, the other arm's planned hours, set per pod), ×1.15, plus a $1.50 floor.
+  Without `MHH_OTHER_H` it falls back to assuming every pod bills until this arm ends. Checked every 10 min after that. Short → push, stop.
 - No log growth for 90 min → stalled → push, stop.
 - `run_gate.py` exits without `results.json` → push logs, stop. The one crash-policy rerun is a human call.
 - If the stop call fails, it pushes "STOP FAILED" and retries every 5 min.
