@@ -1,1 +1,1 @@
-{"log_bytes": 360087, "log_mtime": 1790718718.0, "phase": "train", "step": 5239, "s_per_it": 7.1, "s_per_it_avg": 7.542, "at_utc": "2026-09-29T21:52:01Z"}
+{"log_bytes": 393355, "log_mtime": 1790722332.0, "phase": "train", "step": 5731, "s_per_it": 7.17, "s_per_it_avg": 7.525, "at_utc": "2026-09-29T22:52:19Z"}
