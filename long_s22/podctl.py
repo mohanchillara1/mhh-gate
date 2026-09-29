@@ -144,7 +144,46 @@ def need(log: str, arm: str, eval_h: float = DEFAULT_EVAL_H) -> dict:
     return p
 
 
+def _finished_ok() -> bool:
+    """True only if this pod holds a completed results.json (a real DONE, not a crash or guard stop)."""
+    import glob
+    runs = os.environ.get("MHH_RUNS_DIR", os.path.join(os.environ.get("MHH_W", "/workspace"), "mhh-long-runs"))
+    for f in glob.glob(os.path.join(runs, "*_seed*_att*", "results.json")):
+        try:
+            if json.load(open(f)).get("status") == "completed":
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def done_hold() -> dict:
+    """After a real DONE, keep the pod (GPU + volume) up until the laptop backup finishes, so a closed laptop
+    cannot cost the files. Ends on /workspace/BACKUP_DONE, after MHH_DONE_HOLD_S (default 3 h), or when the
+    balance reaches the floor. Dad, 2026-09-29: keep pods until the code/results are saved locally."""
+    w = os.environ.get("MHH_W", "/workspace")
+    limit = int(os.environ.get("MHH_DONE_HOLD_S", "10800"))
+    t0 = time.time()
+    open(os.path.join(w, "DONE_HOLD_STARTED"), "w").write(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    while True:
+        if os.path.exists(os.path.join(w, "BACKUP_DONE")):
+            return {"hold_end": "BACKUP_DONE", "held_s": int(time.time() - t0)}
+        if time.time() - t0 >= limit:
+            return {"hold_end": "timeout", "held_s": int(time.time() - t0)}
+        b = balance()
+        if "error" not in b and b["balance"] <= FLOOR_USD + 0.5:
+            return {"hold_end": "balance_floor", "held_s": int(time.time() - t0), "balance": b["balance"]}
+        time.sleep(int(os.environ.get("MHH_HOLD_POLL_S", "60")))
+
+
 def stop() -> dict:
+    hold = done_hold() if _finished_ok() else {"hold_end": "none (not a completed run)"}
+    r = _stop()
+    r["done_hold"] = hold
+    return r
+
+
+def _stop() -> dict:
     pod = os.environ.get("RUNPOD_POD_ID", "")
     if os.environ.get("MHH_MOCK_STOP"):
         return {"stopped": pod or "mock", "via": "mock"}
