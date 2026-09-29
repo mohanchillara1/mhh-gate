@@ -12,6 +12,12 @@
   "attempt": 1,
   "config_py_sha256": "40b830ed28b1f51fab079dd43d3f453fa972ad254cec40c271c77a143decd12a",
   "convergence_arm": false,
+  "divergence_scan": {
+    "diverged": false,
+    "last_logged_loss": 0.0843,
+    "non_finite_entries": [],
+    "trainer_state_files_scanned": 1
+  },
   "dry_run": false,
   "eval_list_sha256": "5c1fcaa8d90d1a8e1963053f5f13c9692d254f2dd906de2b94704ffe44c3ac69",
   "fixed_step_count": 6000,
@@ -233,8 +239,9 @@
   "run_id": "T1-s22-a1",
   "seed": 22,
   "started_at_utc": "2026-09-29T05:37:23+00:00",
-  "status": "started",
+  "status": "trained",
   "train_max_steps": 6000,
+  "train_seconds": 21098.2,
   "video_delta_indices": [
     0
   ],
