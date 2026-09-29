@@ -19,3 +19,4 @@ OVERLAY OK: 10 Long tasks, 200 seeded episodes, sha 5c1fcaa8d90d..., builder rep
 - 2026-09-29 05:37 UTC — ✅ render probe: render ok osmesa LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket 70.59711201985677
 - 2026-09-29 05:37 UTC — 🚀 real run launched: T1 seed 22, log /workspace/logs/long_T1_s22.log
 - 2026-09-29 06:37 UTC — heartbeat: {"log_bytes": 65508, "log_mtime": 1790663861.0, "phase": "train", "step": 908, "s_per_it": 3.11, "at_utc": "2026-09-29T06:37:43Z"}
+- 2026-09-29 07:38 UTC — heartbeat: {"log_bytes": 141098, "log_mtime": 1790667474.0, "phase": "train", "step": 2034, "s_per_it": 3.21, "at_utc": "2026-09-29T07:38:03Z"}
