@@ -126,6 +126,17 @@ fatal() {
   stamp "❌ FATAL: $*"
   [ -f "$W/run_long.pid" ] && kill -0 "$(cat "$W/run_long.pid")" 2>/dev/null && stamp "run process still alive; the stop will end it"
   push "FATAL: $*"
+  # Before training, a stopped pod can lose its GPU for good when stock is low (2026-09-29). Give a human
+  # PRETRAIN_GRACE_S to take over on the same pod: `touch /workspace/HOLD` cancels the stop.
+  if [ ! -f "$W/run_long.pid" ] && [ "${PRETRAIN_GRACE_S:-1800}" -gt 0 ]; then
+    stamp "pre-training failure: stopping in ${PRETRAIN_GRACE_S:-1800}s unless $W/HOLD appears"
+    push "pre-training FATAL, pod stops in ${PRETRAIN_GRACE_S:-1800}s unless HOLD" || true
+    local t=0
+    while [ $t -lt "${PRETRAIN_GRACE_S:-1800}" ]; do
+      [ -f "$W/HOLD" ] && { stamp "HOLD found: not stopping; a human has the pod"; push "HOLD: pod left running for a human"; exit 1; }
+      sleep 10; t=$((t + 10))
+    done
+  fi
   stop_pod
   exit 1
 }
