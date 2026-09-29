@@ -1,1 +1,3 @@
 - 2026-09-29 10:18 UTC — chain.sh started: arm=T5 seed=22 mock=0 pod=a5h2opjmy9xnl9
+- 2026-09-29 10:18 UTC — balance preflight: {"phase": "not_started", "hours_left": 21.67, "balance": 19.4212756661, "spend_per_hr": 1.074, "usd_needed": 15.66, "verdict": "WARN_SHORT_1", "at_utc": "2026-09-29T10:18:19Z"}
+- 2026-09-29 10:18 UTC — ❌ FATAL: balance does not cover this arm: {"phase": "not_started", "hours_left": 21.67, "balance": 19.4212756661, "spend_per_hr": 1.074, "usd_needed": 15.66, "verdict": "WARN_SHORT_1", "at_utc": "2026-09-29T10:18:19Z"}
