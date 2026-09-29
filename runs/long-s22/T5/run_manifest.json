@@ -9,7 +9,7 @@
     "LIBERO-Long seed 22 (exploratory, off-protocol, not pooled). Overlay long_s22/make_overlay.py; osmesa."
   ],
   "arm": "T5",
-  "attempt": 1,
+  "attempt": 2,
   "config_py_sha256": "40b830ed28b1f51fab079dd43d3f453fa972ad254cec40c271c77a143decd12a",
   "convergence_arm": false,
   "dry_run": false,
@@ -136,7 +136,7 @@
   "provenance": {
     "arm": "T5",
     "base_model_path": "nvidia/GR00T-N1.7-3B",
-    "captured_at_utc": "2026-09-29T05:46:19+00:00",
+    "captured_at_utc": "2026-09-29T10:48:59+00:00",
     "dataset": {
       "meta_files": {
         "meta/episodes.jsonl": {
@@ -179,7 +179,7 @@
       "WANDB_MODE": null
     },
     "eval_episode_seeds_hash": "181fd288177ebcc4447ddaf42e4c45aa056e40d49e94302f05c5d43777268871",
-    "hostname": "908b9b972e6c",
+    "hostname": "3532e40ad2ba",
     "isaac_groot": {
       "commit": "51d4c89f72fda44cbf77285c6a8114b52676b8a1",
       "describe": "51d4c89",
@@ -221,13 +221,13 @@
             6
           ],
           "name": "NVIDIA A40",
-          "total_mem_gib": 44.42
+          "total_mem_gib": 44.43
         }
       ],
       "numpy": "1.26.4",
-      "nvidia_smi": "NVIDIA A40, 580.159.04, 46068 MiB",
+      "nvidia_smi": "NVIDIA A40, 570.195.03, 46068 MiB",
       "pandas": "2.2.3",
-      "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+      "platform": "Linux-6.8.0-60-generic-x86_64-with-glibc2.39",
       "python": "3.12.3",
       "torch": "2.9.0+cu128",
       "torchcodec": "0.8.0",
@@ -241,9 +241,9 @@
       0
     ]
   },
-  "run_id": "T5-s22-a1",
+  "run_id": "T5-s22-a2",
   "seed": 22,
-  "started_at_utc": "2026-09-29T05:46:17+00:00",
+  "started_at_utc": "2026-09-29T10:48:57+00:00",
   "status": "started",
   "train_max_steps": 6000,
   "video_delta_indices": [

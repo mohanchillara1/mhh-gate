@@ -18,3 +18,5 @@ OVERLAY OK: 10 Long tasks, 200 seeded episodes, sha 5c1fcaa8d90d..., builder rep
 - 2026-09-29 10:34 UTC — ✅ Long overlay in place at /workspace/mhh-long
 - 2026-09-29 10:48 UTC — ✅ dry run T5 passed:   peak_vram_gib: 33.14 
 - 2026-09-29 10:48 UTC — ✅ render probe: render ok osmesa LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket 70.59711201985677
+- 2026-09-29 10:48 UTC — 🚀 real run launched: T5 seed 22, log /workspace/logs/long_T5_s22.log
+- 2026-09-29 11:49 UTC — heartbeat: {"log_bytes": 36104, "log_mtime": 1790682545.0, "phase": "train", "step": 437, "s_per_it": 7.0, "s_per_it_avg": 7.636, "at_utc": "2026-09-29T11:49:09Z"}
