@@ -21,3 +21,4 @@ OVERLAY OK: 10 Long tasks, 200 seeded episodes, sha 5c1fcaa8d90d..., builder rep
 - 2026-09-29 10:48 UTC — 🚀 real run launched: T5 seed 22, log /workspace/logs/long_T5_s22.log
 - 2026-09-29 11:49 UTC — heartbeat: {"log_bytes": 36104, "log_mtime": 1790682545.0, "phase": "train", "step": 437, "s_per_it": 7.0, "s_per_it_avg": 7.636, "at_utc": "2026-09-29T11:49:09Z"}
 - 2026-09-29 12:49 UTC — heartbeat: {"log_bytes": 68922, "log_mtime": 1790686158.0, "phase": "train", "step": 926, "s_per_it": 7.79, "s_per_it_avg": 7.505, "at_utc": "2026-09-29T12:49:25Z"}
+- 2026-09-29 13:49 UTC — heartbeat: {"log_bytes": 100248, "log_mtime": 1790689780.0, "phase": "train", "step": 1388, "s_per_it": 7.26, "s_per_it_avg": 7.617, "at_utc": "2026-09-29T13:49:41Z"}
