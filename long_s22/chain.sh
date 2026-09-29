@@ -52,6 +52,9 @@ export GROOT_REPO=$W/Isaac-GR00T HF_HOME=$W/hf MHH_RUNS_DIR=$RUNS
 # so these exports win.
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa MPLBACKEND=agg
 export HF_HUB_DISABLE_XET=1 HF_HUB_ENABLE_HF_TRANSFER=0
+# apt/dpkg must never touch a terminal: under tmux + `timeout` (background process group) the first tty access
+# stops apt with SIGTTOU and setup hangs silently (2026-09-29, state T for 41 min). No prompts, no ctty.
+export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 if [ "$MOCK" = 1 ]; then PY=python3; else PY=$GROOT_REPO/.venv/bin/python; fi
 podctl() { python3 "$HERE/podctl.py" "$@"; }
 
@@ -164,7 +167,7 @@ setup() {
   cd $GROOT_REPO && git fetch -q origin && git checkout -q $PIN
   [ "$(git rev-parse HEAD)" = "$PIN" ]
   apt-get update -qq
-  apt-get install -y -qq git-lfs ffmpeg libosmesa6 libosmesa6-dev libgl1 libglu1-mesa \
+  apt-get install -y -qq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold git-lfs ffmpeg libosmesa6 libosmesa6-dev libgl1 libglu1-mesa \
       libegl1 libgles2 libglvnd0 libopengl0 tmux >/dev/null
   git lfs install >/dev/null; git lfs pull
   command -v uv >/dev/null || { curl -LsSf https://astral.sh/uv/install.sh | sh; }
@@ -194,7 +197,7 @@ setup() {
 
 if [ "$MOCK" != 1 ]; then
   stamp "setup started"
-  ( export -f setup; timeout "$SETUP_TIMEOUT_S" bash -c "PY=$PY; setup" ) > $LOGS/setup_long.log 2>&1 \
+  ( export -f setup; setsid -w timeout "$SETUP_TIMEOUT_S" bash -c "PY=$PY; setup" ) < /dev/null > $LOGS/setup_long.log 2>&1 \
       || fatal "setup failed or timed out (see setup_long.tail.log)"
   stamp "✅ setup done"
 fi
@@ -210,7 +213,7 @@ stamp "✅ Long overlay in place at $LONG"
 # ---------------------------------------------------------------- 3. dry run + render probe
 if [ "$MOCK" != 1 ]; then
   ( cd "$LONG" && MHH_RUNS_DIR=$W/scratch-dryruns $PY run_gate.py --arm "$ARM" --seed $SEED --dry-run ) \
-      > $LOGS/dryrun_long_${ARM}.log 2>&1 || fatal "dry run $ARM failed (see dryrun_long_${ARM}.tail.log)"
+      < /dev/null > $LOGS/dryrun_long_${ARM}.log 2>&1 || fatal "dry run $ARM failed (see dryrun_long_${ARM}.tail.log)"
   stamp "✅ dry run $ARM passed: $(grep -iE 's/step|steps/s|peak|GiB' $LOGS/dryrun_long_${ARM}.log | tail -3 | tr '\n' ' ')"
   $GROOT_REPO/gr00t/eval/sim/LIBERO/libero_uv/.venv/bin/python - > $LOGS/render_probe.log 2>&1 <<'EOF' || fatal "osmesa render probe failed: eval would die after training"
 import os
@@ -234,7 +237,7 @@ push "dry run + render probe passed; launching real run"
 rm -f "$RCF"
 ( cd "$LONG" && $PY run_gate.py --arm "$ARM" --seed $SEED \
     --notes "LIBERO-Long seed 22 (exploratory, off-protocol, not pooled). Overlay long_s22/make_overlay.py; osmesa." \
-    > "$LOG" 2>&1; echo $? > "$RCF" ) &
+    < /dev/null > "$LOG" 2>&1; echo $? > "$RCF" ) &
 echo $! > "$W/run_long.pid"
 stamp "🚀 real run launched: $ARM seed $SEED, log $LOG"
 
