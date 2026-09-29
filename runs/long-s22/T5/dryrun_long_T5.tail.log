@@ -18,7 +18,7 @@ Total steps: 95784, average shard length: 1018.9787234042553, shard length std: 
 /workspace/Isaac-GR00T/.venv/lib/python3.12/site-packages/albumentations/__init__.py:13: UserWarning: A new version of Albumentations is available: 2.0.8 (you have 1.4.18). Upgrade using: pip install -U albumentations. To disable automatic update checks, set the environment variable NO_ALBUMENTATIONS_UPDATE to 1.
   check_for_updates()
       B. dump the architecture that actually LOADED (issue #755)
-Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [01:36<01:36, 96.36s/it]Fetching 2 files: 100%|██████████| 2/2 [01:36<00:00, 48.18s/it]
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [07:38<07:38, 458.86s/it]Fetching 2 files: 100%|██████████| 2/2 [07:38<00:00, 229.43s/it]
 `torch_dtype` is deprecated! Use `dtype` instead!
 /workspace/Isaac-GR00T/gr00t/model/modules/dit.py:255: FutureWarning: Accessing config attribute `compute_dtype` directly via 'AlternateVLDiT' object attribute is deprecated. Please access 'compute_dtype' over 'AlternateVLDiT's config object instead, e.g. 'unet.config.compute_dtype'.
   embedding_dim=self.inner_dim, compute_dtype=self.compute_dtype
@@ -26,7 +26,7 @@ Total steps: 95784, average shard length: 1018.9787234042553, shard length std: 
   self.proj_out_2 = nn.Linear(self.inner_dim, self.output_dim)
 Total number of DiT parameters:  1091722240
 Total number of SelfAttentionTransformer parameters:  201433088
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:33<00:33, 33.56s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:47<00:00, 22.17s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:47<00:00, 23.88s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:34<00:34, 34.49s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:46<00:00, 21.30s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:46<00:00, 23.28s/it]
       preflight PASSED:
         allow_padding arrives : PASS
         loaded arch           : LLM=16 DiT=32 (config.select_layer=16)
@@ -41,21 +41,21 @@ Generated 1497 shards for dataset /workspace/Isaac-GR00T/examples/LIBERO/libero_
 Total steps: 95784, average shard length: 63.983967935871746, shard length std: 9.506093226829918
 Total number of DiT parameters:  1091722240
 Total number of SelfAttentionTransformer parameters:  201433088
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.98s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.50s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.57s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.36s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.05s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:04<00:00,  2.10s/it]
 ==============================================================================
 DRY RUN COMPLETE — nothing was trained.
   batch_size_per_forward: 16
   video_delta_indices: [-4, -3, -2, -1, 0]
   images_per_sample: 10
   timed_steps: 12
-  seconds_per_forward_backward: 2.0788
-  seconds_per_optimizer_step: 8.315
-  projected_hours_to_fixed_step: 13.86
-  projected_usd_at_config_rate: 6.1
+  seconds_per_forward_backward: 2.0635
+  seconds_per_optimizer_step: 8.2539
+  projected_hours_to_fixed_step: 13.76
+  projected_usd_at_config_rate: 6.05
   usd_per_hour_used: 0.44
-  peak_vram_gib: 33.13
+  peak_vram_gib: 33.14
   losses_finite: True
-  first_loss: 1.2555110454559326
-  last_loss: 0.9953597784042358
+  first_loss: 1.333902359008789
+  last_loss: 1.105167269706726
   caveat: torch.autocast approximation of the trainer's bf16 path; not a benchmark, a planning estimate
 ==============================================================================

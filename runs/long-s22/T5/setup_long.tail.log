@@ -21,100 +21,100 @@
 + uv pip install --requirements /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/requirements-py312.txt
 warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
 Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
-Resolved 117 packages in 1.99s
-Downloading pillow (6.6MiB)
-Downloading pygments (1.2MiB)
-Downloading wandb (15.4MiB)
-Downloading nvidia-cuda-runtime (2.1MiB)
-Downloading kiwisolver (1.4MiB)
-Downloading nvidia-cublas (403.5MiB)
-Downloading triton (236.5MiB)
-Downloading numba (3.7MiB)
-Downloading nvidia-cuda-nvrtc (86.0MiB)
-Downloading nvidia-curand (56.8MiB)
-Downloading cuda-bindings (6.8MiB)
-Downloading nvidia-cufft (204.2MiB)
-Downloading imageio-ffmpeg (28.1MiB)
-Downloading nvidia-cusparse (139.2MiB)
-Downloading nvidia-cuda-cupti (10.2MiB)
-Downloading pyopengl (3.0MiB)
-Downloading nvidia-cufile (1.2MiB)
-Downloading torchvision (7.1MiB)
-Downloading mujoco (27.4MiB)
-Downloading nvidia-nccl-cu13 (206.0MiB)
-Downloading grpcio (6.8MiB)
-Downloading tensorboard (5.3MiB)
-Downloading fonttools (5.1MiB)
-Downloading scipy (33.6MiB)
-Downloading tensorboard-data-server (6.3MiB)
-Downloading torch (528.9MiB)
-Downloading nvidia-nvshmem-cu13 (57.6MiB)
-Downloading nvidia-cusolver (191.6MiB)
-Downloading llvmlite (57.1MiB)
-Downloading networkx (2.0MiB)
-Downloading h5py (5.2MiB)
-Downloading matplotlib (7.9MiB)
-Downloading nvidia-cudnn-cu13 (527.5MiB)
-Downloading nvidia-cusparselt-cu13 (162.3MiB)
+Resolved 117 packages in 1.90s
 Downloading hf-xet (4.3MiB)
-Downloading opencv-python (59.7MiB)
+Downloading pygments (1.2MiB)
+Downloading nvidia-cuda-cupti (10.2MiB)
+Downloading pillow (6.6MiB)
+Downloading nvidia-cuda-runtime (2.1MiB)
+Downloading nvidia-cufile (1.2MiB)
+Downloading kiwisolver (1.4MiB)
+Downloading torch (528.9MiB)
+Downloading triton (236.5MiB)
+Downloading tensorboard (5.3MiB)
+Downloading grpcio (6.8MiB)
+Downloading nvidia-cublas (403.5MiB)
+Downloading tensorboard-data-server (6.3MiB)
+Downloading cuda-bindings (6.8MiB)
+Downloading torchvision (7.1MiB)
+Downloading h5py (5.2MiB)
+Downloading numba (3.7MiB)
+Downloading networkx (2.0MiB)
+Downloading fonttools (5.1MiB)
 Downloading robosuite (184.5MiB)
+Downloading opencv-python (59.7MiB)
+Downloading nvidia-nccl-cu13 (206.0MiB)
+Downloading nvidia-cudnn-cu13 (527.5MiB)
+Downloading nvidia-cufft (204.2MiB)
+Downloading nvidia-cusolver (191.6MiB)
+Downloading nvidia-cusparse (139.2MiB)
+Downloading nvidia-cuda-nvrtc (86.0MiB)
+Downloading nvidia-nvshmem-cu13 (57.6MiB)
+Downloading pyopengl (3.0MiB)
+Downloading scipy (33.6MiB)
+Downloading matplotlib (7.9MiB)
+Downloading wandb (15.4MiB)
+Downloading llvmlite (57.1MiB)
+Downloading mujoco (27.4MiB)
+Downloading nvidia-cusparselt-cu13 (162.3MiB)
+Downloading nvidia-curand (56.8MiB)
 Downloading nvidia-nvjitlink (40.5MiB)
+Downloading imageio-ffmpeg (28.1MiB)
  Downloading nvidia-cufile
  Downloading kiwisolver
    Building future==0.18.2
-   Building gym==0.25.2
    Building egl-probe==1.0.2
+   Building gym==0.25.2
    Building robomimic==0.2.0
-   Building easydict==1.9
    Building bddl==1.0.1
+   Building easydict==1.9
+ Downloading nvidia-cuda-runtime
       Built easydict==1.9
       Built robomimic==0.2.0
- Downloading nvidia-cuda-runtime
-      Built gym==0.25.2
-      Built bddl==1.0.1
       Built future==0.18.2
+      Built bddl==1.0.1
+      Built gym==0.25.2
  Downloading pygments
-      Built egl-probe==1.0.2
  Downloading hf-xet
  Downloading networkx
+      Built egl-probe==1.0.2
  Downloading fonttools
  Downloading h5py
- Downloading tensorboard-data-server
  Downloading tensorboard
+ Downloading tensorboard-data-server
  Downloading pillow
- Downloading torchvision
- Downloading cuda-bindings
  Downloading numba
+ Downloading cuda-bindings
+ Downloading torchvision
  Downloading grpcio
  Downloading nvidia-cuda-cupti
  Downloading matplotlib
  Downloading imageio-ffmpeg
  Downloading wandb
  Downloading mujoco
- Downloading nvidia-nvjitlink
  Downloading scipy
+ Downloading nvidia-nvjitlink
  Downloading nvidia-curand
- Downloading nvidia-nvshmem-cu13
  Downloading llvmlite
+ Downloading nvidia-nvshmem-cu13
  Downloading opencv-python
  Downloading nvidia-cuda-nvrtc
- Downloading nvidia-cusparse
  Downloading pyopengl
+ Downloading nvidia-cusparse
  Downloading nvidia-cusparselt-cu13
- Downloading nvidia-cusolver
- Downloading nvidia-cufft
- Downloading nvidia-nccl-cu13
  Downloading robosuite
+ Downloading nvidia-cusolver
+ Downloading nvidia-nccl-cu13
+ Downloading nvidia-cufft
  Downloading triton
  Downloading nvidia-cublas
  Downloading nvidia-cudnn-cu13
  Downloading torch
-Prepared 97 packages in 1m 20s
+Prepared 97 packages in 31.87s
 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
          If the cache and target directories are on different filesystems, hardlinking may not be supported.
          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
-Installed 117 packages in 2m 23s
+Installed 117 packages in 1m 40s
  + absl-py==2.5.0
  + antlr4-python3-runtime==4.9.3
  + attrs==26.1.0
@@ -235,47 +235,47 @@ Installed 117 packages in 2m 23s
 + uv pip install -e /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/../../../../external_dependencies/LIBERO --config-settings editable_mode=compat
 warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
 Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
-Resolved 1 package in 1.02s
+Resolved 1 package in 761ms
    Building libero @ file:///workspace/Isaac-GR00T/external_dependencies/LIBERO
       Built libero @ file:///workspace/Isaac-GR00T/external_dependencies/LIBERO
-Prepared 1 package in 470ms
+Prepared 1 package in 293ms
 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
          If the cache and target directories are on different filesystems, hardlinking may not be supported.
          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
-Installed 1 package in 249ms
+Installed 1 package in 154ms
  + libero==0.1.0 (from file:///workspace/Isaac-GR00T/external_dependencies/LIBERO)
 + uv pip install torch==2.9.0 torchvision==0.24.0 pydantic av tianshou==0.5.1 numba==0.65.1 llvmlite==0.47.0 tyro pandas dm_tree einops==0.8.1 albumentations==1.4.18 zmq
 warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
 Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
-Resolved 73 packages in 1.32s
+Resolved 73 packages in 1.01s
    Building zmq==0.0.0
 Downloading pydantic-core (2.0MiB)
-Downloading numpy (15.9MiB)
-Downloading av (34.1MiB)
-Downloading pandas (10.3MiB)
-Downloading opencv-python-headless (58.4MiB)
 Downloading llvmlite (53.7MiB)
+Downloading av (34.1MiB)
+Downloading scikit-image (12.9MiB)
 Downloading numba (3.6MiB)
 Downloading torchvision (7.7MiB)
+Downloading opencv-python-headless (58.4MiB)
+Downloading numpy (15.9MiB)
 Downloading torch (858.1MiB)
-Downloading scikit-image (12.9MiB)
+Downloading pandas (10.3MiB)
       Built zmq==0.0.0
  Downloading pydantic-core
  Downloading torchvision
  Downloading numba
  Downloading scikit-image
  Downloading numpy
+ Downloading pandas
  Downloading av
  Downloading llvmlite
  Downloading opencv-python-headless
- Downloading pandas
  Downloading torch
-Prepared 27 packages in 21.26s
-Uninstalled 7 packages in 20.89s
+Prepared 27 packages in 16.60s
+Uninstalled 7 packages in 14.39s
 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
          If the cache and target directories are on different filesystems, hardlinking may not be supported.
          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
-Installed 46 packages in 2m 18s
+Installed 46 packages in 1m 33s
  + albucore==0.0.17
  + albumentations==1.4.18
  + annotated-types==0.8.0
@@ -332,13 +332,13 @@ Installed 46 packages in 2m 18s
 + uv pip install transformers==4.57.3 msgpack==1.1.0 msgpack-numpy==0.4.8 gymnasium==0.29.1
 warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
 Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
-Resolved 23 packages in 433ms
-Prepared 1 package in 222ms
-Uninstalled 1 package in 579ms
+Resolved 23 packages in 207ms
+Prepared 1 package in 116ms
+Uninstalled 1 package in 292ms
 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
          If the cache and target directories are on different filesystems, hardlinking may not be supported.
          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
-Installed 3 packages in 2.49s
+Installed 3 packages in 1.90s
  - gymnasium==1.3.0
  + gymnasium==0.29.1
  + msgpack==1.1.0
@@ -346,15 +346,15 @@ Installed 3 packages in 2.49s
 + uv pip install numpy==1.26.4 mujoco==3.3.1
 warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
 Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
-Resolved 9 packages in 106ms
+Resolved 9 packages in 83ms
 Downloading mujoco (6.4MiB)
  Downloading mujoco
-Prepared 1 package in 241ms
-Uninstalled 2 packages in 2.36s
+Prepared 1 package in 222ms
+Uninstalled 2 packages in 1.38s
 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
          If the cache and target directories are on different filesystems, hardlinking may not be supported.
          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
-Installed 2 packages in 8.31s
+Installed 2 packages in 7.16s
  - mujoco==3.14.0
  + mujoco==3.3.1
  - numpy==2.4.6
