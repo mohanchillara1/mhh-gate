@@ -1,0 +1,257 @@
+{
+  "argv": [
+    "run_gate.py",
+    "--arm",
+    "T5",
+    "--seed",
+    "22",
+    "--notes",
+    "LIBERO-Long seed 22 (exploratory, off-protocol, not pooled). Overlay long_s22/make_overlay.py; osmesa."
+  ],
+  "arm": "T5",
+  "attempt": 1,
+  "config_py_sha256": "40b830ed28b1f51fab079dd43d3f453fa972ad254cec40c271c77a143decd12a",
+  "convergence_arm": false,
+  "dry_run": false,
+  "eval_list_sha256": "5c1fcaa8d90d1a8e1963053f5f13c9692d254f2dd906de2b94704ffe44c3ac69",
+  "fixed_step_count": 6000,
+  "gate_script_sha256": "1c5788c455f67c9789f2c77e8f891ad99cddb823c7db55d00927608c60dab951",
+  "notes": "LIBERO-Long seed 22 (exploratory, off-protocol, not pooled). Overlay long_s22/make_overlay.py; osmesa.",
+  "preflight": {
+    "A_allow_padding": {
+      "checked_at": "extract_step_data (sharded_single_step_dataset.py:27-79)",
+      "dataset_allow_padding_attr": true,
+      "episode_0_rows": 214,
+      "guard_observed_allow_padding": true,
+      "mid_episode_stack_check": {
+        "distinct_frames": 5,
+        "probe_step": 60
+      },
+      "padded_slots_verified_pixelwise": 4,
+      "verdict": "PASS",
+      "video_key_checked": "image"
+    },
+    "B_architecture": {
+      "config.action_horizon": 40,
+      "config.attend_text_every_n_blocks": 2,
+      "config.backbone_embedding_dim": 2048,
+      "config.diffusion_model_cfg.num_attention_heads": 32,
+      "config.diffusion_model_cfg.num_layers": 32,
+      "config.hidden_size": 1024,
+      "config.max_seq_len": 1024,
+      "config.model_name": "nvidia/Cosmos-Reason2-2B",
+      "config.select_layer": 16,
+      "config.use_alternate_vl_dit": true,
+      "config.use_vlln": true,
+      "declared_select_layer_is_ignored": false,
+      "dit_blocks_loaded": 32,
+      "dit_blocks_path": "action_head.model.transformer_blocks",
+      "expected_dit_blocks": 32,
+      "expected_llm_layers": 16,
+      "llm_layers_loaded": 16,
+      "llm_layers_path": "backbone.model.language_model.layers",
+      "matches_expected": true,
+      "source": "live model object, not conf.yaml",
+      "total_parameters": 3144016000,
+      "trainable_parameters": 3144016000
+    },
+    "C_normalization": {
+      "effective_mode_per_joint_group": {
+        "action.gripper": "minmax_q01q99",
+        "action.pitch": "minmax_q01q99",
+        "action.roll": "minmax_q01q99",
+        "action.x": "minmax_q01q99",
+        "action.y": "minmax_q01q99",
+        "action.yaw": "minmax_q01q99",
+        "action.z": "minmax_q01q99",
+        "state.gripper": "minmax_q01q99",
+        "state.pitch": "minmax_q01q99",
+        "state.roll": "minmax_q01q99",
+        "state.x": "minmax_q01q99",
+        "state.y": "minmax_q01q99",
+        "state.yaw": "minmax_q01q99",
+        "state.z": "minmax_q01q99"
+      },
+      "processor.use_mean_std_flag_value": false,
+      "processor.use_mean_std_is_consumed": false,
+      "processor.use_mean_std_note": "dead config at commit 51d4c89f7: set at processing_gr00t_n1d7.py:262, serialized :784, never forwarded to StateActionProcessor (:251-258)",
+      "state_action_processor.apply_sincos_state_encoding": false,
+      "state_action_processor.clip_outliers": true,
+      "state_action_processor.use_percentiles": true,
+      "state_action_processor.use_relative_action": true,
+      "statistics_source": "checkpoint statistics.json, overridden by dataset statistics when config.data.override_pretraining_statistics is True (data_config.py:83)",
+      "verdict": "RECORDED"
+    },
+    "D_arm_override": {
+      "action_horizon": 16,
+      "verdict": "PASS",
+      "video_delta_indices": [
+        -4,
+        -3,
+        -2,
+        -1,
+        0
+      ],
+      "video_modality_keys": [
+        "image",
+        "wrist_image"
+      ]
+    }
+  },
+  "preregistered_recipe": {
+    "A40_USD_PER_HOUR": 0.44,
+    "ALLOW_PADDING": true,
+    "EPISODE_SAMPLING_RATE": 0.1,
+    "EVAL_EPISODES_PER_TASK": 20,
+    "EVAL_SHARD_SIZE": 5,
+    "GLOBAL_BATCH_SIZE": 16,
+    "GRADIENT_ACCUMULATION_STEPS": 4,
+    "LEARNING_RATE": 0.0001,
+    "LIBERO_SUITE": "libero_10",
+    "MAX_EPISODE_STEPS": 720,
+    "MULTIPROCESSING_CONTEXT": "fork",
+    "NUM_GPUS": 1,
+    "N_ACTION_STEPS": 8,
+    "PREREGISTERED_SEEDS": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "SAVE_STEPS": 1000,
+    "SAVE_TOTAL_LIMIT": 1,
+    "SHARD_SIZE": 1024,
+    "STATE_DROPOUT_PROB": 0.2,
+    "TRAIN_MAX_STEPS": 6000,
+    "TUNE_DIFFUSION_MODEL": true,
+    "TUNE_LLM": false,
+    "TUNE_PROJECTOR": true,
+    "TUNE_VISUAL": false,
+    "USE_MEAN_STD": false,
+    "USE_PERCENTILES": true,
+    "WARMUP_RATIO": 0.05,
+    "WEIGHT_DECAY": 1e-05
+  },
+  "provenance": {
+    "arm": "T5",
+    "base_model_path": "nvidia/GR00T-N1.7-3B",
+    "captured_at_utc": "2026-09-29T05:46:19+00:00",
+    "dataset": {
+      "meta_files": {
+        "meta/episodes.jsonl": {
+          "bytes": 43755,
+          "sha256": "5589f8f87cfddb34812782462160bf55b0d3082e404240682d1d0a89faba8265"
+        },
+        "meta/episodes_stats.jsonl": {
+          "bytes": 938760,
+          "sha256": "884f963e29d3078a0c32099d055a7d46e4701935b2a00f70c68801baae9619ea"
+        },
+        "meta/info.json": {
+          "bytes": 3350,
+          "sha256": "e5643c4e72e65f133ce0b1a5b9d9aaa5b2f065ed7f0f00ebbc231bde61af96d5"
+        },
+        "meta/modality.json": {
+          "bytes": 1394,
+          "sha256": "ecb86712195689112f8328c7952523e558d1b495dcbc3be7e2d4cd5a16a0cf6d"
+        },
+        "meta/stats.json": {
+          "bytes": 3870,
+          "sha256": "8283e003742e41f0a55cce468daee0c388e7d203e72b6a51d53c04765fb68110"
+        },
+        "meta/tasks.jsonl": {
+          "bytes": 923,
+          "sha256": "45f9eb4d4b6b04999f64640c0aae380555372b7b273a904f5f459ad05d4a0a6a"
+        }
+      },
+      "n_mp4": 758,
+      "path": "/workspace/Isaac-GR00T/examples/LIBERO/libero_10_no_noops_1.0.0_lerobot"
+    },
+    "env_vars_of_interest": {
+      "CUBLAS_WORKSPACE_CONFIG": null,
+      "CUDA_VISIBLE_DEVICES": null,
+      "GR00T_EVAL_SEED": null,
+      "HF_HOME": "/workspace/hf",
+      "HF_TOKEN_PATH": null,
+      "MUJOCO_GL": "osmesa",
+      "PYOPENGL_PLATFORM": "osmesa",
+      "PYTHONHASHSEED": null,
+      "WANDB_MODE": null
+    },
+    "eval_episode_seeds_hash": "181fd288177ebcc4447ddaf42e4c45aa056e40d49e94302f05c5d43777268871",
+    "hostname": "908b9b972e6c",
+    "isaac_groot": {
+      "commit": "51d4c89f72fda44cbf77285c6a8114b52676b8a1",
+      "describe": "51d4c89",
+      "dirty": true,
+      "matches_pin": true,
+      "path": "/workspace/Isaac-GR00T",
+      "pinned_commit": "51d4c89f72fda44cbf77285c6a8114b52676b8a1"
+    },
+    "libero_eval_env": {
+      "gymnasium": "0.29.1",
+      "libero_file": null,
+      "mujoco": "3.3.1",
+      "numpy": "1.26.4",
+      "python": "3.12.3",
+      "robosuite": "1.4.0",
+      "torch": "2.9.0+cu128"
+    },
+    "libero_instructions": {
+      "error": "probe did not return JSON",
+      "raw": "[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]\n{\"libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket\": {\"task_id\": 0, \"language\": \"put both the alphabet soup and the tomato sauce in the basket\", \"bddl_file\": \"LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket\": {\"task_id\": 1, \"language\": \"put both the cream cheese box and the butter in the basket\", \"bddl_file\": \"LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it\": {\"task_id\": 2, \"language\": \"turn on the stove and put the moka pot on it\", \"bddl_file\": \"KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it\": {\"task_id\": 3, \"language\": \"put the black bowl in the bottom drawer of the cabinet and close it\", \"bddl_file\": \"KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate\": {\"task_id\": 4, \"language\": \"put the white mug on the left plate and put the yellow and white mug on the right plate\", \"bddl_file\": \"LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy\": {\"task_id\": 5, \"language\": \"pick up the book and place it in the back compartment of the caddy\", \"bddl_file\": \"STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy.bddl\", \"problem_folder\": \"libero_"
+    },
+    "libero_repo": {
+      "commit": "8f1084e3132a39270c3a13ebe37270a43ece2a01",
+      "describe": "8f1084e",
+      "dirty": false,
+      "path": "/workspace/Isaac-GR00T/external_dependencies/LIBERO"
+    },
+    "seed": 22,
+    "training_env": {
+      "accelerate": "1.13.0",
+      "bf16_supported": true,
+      "cuda_available": true,
+      "cuda_version": "12.8",
+      "executable": "/workspace/Isaac-GR00T/.venv/bin/python",
+      "gpus": [
+        {
+          "capability": [
+            8,
+            6
+          ],
+          "name": "NVIDIA A40",
+          "total_mem_gib": 44.42
+        }
+      ],
+      "numpy": "1.26.4",
+      "nvidia_smi": "NVIDIA A40, 580.159.04, 46068 MiB",
+      "pandas": "2.2.3",
+      "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+      "python": "3.12.3",
+      "torch": "2.9.0+cu128",
+      "torchcodec": "0.8.0",
+      "transformers": "4.57.3"
+    },
+    "video_delta_indices": [
+      -4,
+      -3,
+      -2,
+      -1,
+      0
+    ]
+  },
+  "run_id": "T5-s22-a1",
+  "seed": 22,
+  "started_at_utc": "2026-09-29T05:46:17+00:00",
+  "status": "started",
+  "train_max_steps": 6000,
+  "video_delta_indices": [
+    -4,
+    -3,
+    -2,
+    -1,
+    0
+  ],
+  "weirdness": "isaac-groot working tree dirty"
+}
