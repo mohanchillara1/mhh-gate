@@ -39,7 +39,9 @@ def _gql(query: str) -> dict:
         return {"error": "RUNPOD_ACCOUNT_KEY unset"}
     req = urllib.request.Request(
         GRAPHQL, data=json.dumps({"query": query}).encode(),
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}",
+                 # api.runpod.io answers 403 to Python's default "Python-urllib/3.x" agent (seen 2026-09-29)
+                 "User-Agent": "mhh-gate-long-s22/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read())
