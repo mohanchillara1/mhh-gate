@@ -65,6 +65,7 @@ def balance() -> dict:
 
 
 TQDM = re.compile(r"(\d+)/(\d+) \[[^\]]*?([\d.]+)(s/it|it/s)")
+ELAPSED = re.compile(r"(\d+)/6000 \[([\d:]+)<")
 
 
 def progress(log: str, arm: str) -> dict:
@@ -86,6 +87,14 @@ def progress(log: str, arm: str) -> dict:
     if steps:
         step, _, rate, unit = steps[-1]
         out.update(phase="train", step=step, s_per_it=rate if unit == "s/it" else 1.0 / rate)
+        # tqdm's rate is a short moving average: a checkpoint save makes it jump (7 -> 19 s/it at step 2000,
+        # 2026-09-29, which falsely stopped T5). For projections use the whole-run average: elapsed / steps.
+        el = ELAPSED.findall(txt)
+        if el and step > 50:
+            s, e = el[-1]
+            parts = [int(x) for x in e.split(":")]
+            secs = sum(v * 60 ** i for i, v in enumerate(reversed(parts)))
+            out["s_per_it_avg"] = round(secs / int(s), 3)
     else:
         out.update(phase="setup_or_preflight", step=0)
     return out
@@ -98,7 +107,7 @@ def need(log: str, arm: str, eval_h: float = DEFAULT_EVAL_H) -> dict:
     elif p["phase"] == "eval":
         h = eval_h * max(0, EVAL_SHARDS - max(0, p["shards_started"] - 1)) / EVAL_SHARDS
     elif p["phase"] in ("train", "setup_or_preflight"):
-        rate = p.get("s_per_it") or DEFAULT_S_PER_IT[arm]
+        rate = p.get("s_per_it_avg") or p.get("s_per_it") or DEFAULT_S_PER_IT[arm]
         h = (6000 - p.get("step", 0)) * rate / 3600 + eval_h
     else:
         h = 0.0
@@ -117,9 +126,20 @@ def need(log: str, arm: str, eval_h: float = DEFAULT_EVAL_H) -> dict:
     if b["balance"] <= FLOOR_USD:
         p["verdict"] = "STOP_FLOOR"
     elif b["balance"] < usd * MARGIN + FLOOR_USD:
-        p["verdict"] = "STOP_SHORT"
+        # Two strikes: a projection must be short on two consecutive checks (>= 5 min apart) before it stops a pod.
+        sf = os.path.join(os.environ.get("MHH_W", "/workspace"), f"guard_strike_{arm}")
+        prev = os.path.getmtime(sf) if os.path.exists(sf) else None
+        if prev and time.time() - prev >= 300:
+            p["verdict"] = "STOP_SHORT"
+        else:
+            if not prev:
+                open(sf, "w").write(json.dumps(p))
+            p["verdict"] = "WARN_SHORT_1"
     else:
         p["verdict"] = "OK"
+        sf = os.path.join(os.environ.get("MHH_W", "/workspace"), f"guard_strike_{arm}")
+        if os.path.exists(sf):
+            os.replace(sf, sf + ".cleared")
     return p
 
 
