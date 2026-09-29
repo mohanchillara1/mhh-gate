@@ -1,4 +1,400 @@
-Cloning into '/workspace/Isaac-GR00T'...
-Updating files:  14% (63/440)Updating files:  15% (66/440)Updating files:  16% (71/440)Updating files:  17% (75/440)Updating files:  18% (80/440)Updating files:  19% (84/440)Updating files:  20% (88/440)Updating files:  21% (93/440)Updating files:  22% (97/440)Updating files:  23% (102/440)Updating files:  24% (106/440)Updating files:  25% (110/440)Updating files:  26% (115/440)Updating files:  27% (119/440)Updating files:  28% (124/440)Updating files:  29% (128/440)Updating files:  30% (132/440)Updating files:  31% (137/440)Updating files:  32% (141/440)Updating files:  33% (146/440)Updating files:  34% (150/440)Updating files:  35% (154/440)Updating files:  36% (159/440)Updating files:  37% (163/440)Updating files:  38% (168/440)Updating files:  39% (172/440)Updating files:  40% (176/440)Updating files:  41% (181/440)Updating files:  42% (185/440)Updating files:  43% (190/440)Updating files:  44% (194/440)Updating files:  45% (198/440)Updating files:  46% (203/440)Updating files:  47% (207/440)Updating files:  48% (212/440)Updating files:  49% (216/440)Updating files:  50% (220/440)Updating files:  51% (225/440)Updating files:  52% (229/440)Updating files:  53% (234/440)Updating files:  54% (238/440)Updating files:  55% (242/440)Updating files:  55% (243/440)Updating files:  56% (247/440)Updating files:  57% (251/440)Updating files:  58% (256/440)Updating files:  59% (260/440)Updating files:  60% (264/440)Updating files:  61% (269/440)Updating files:  62% (273/440)Updating files:  63% (278/440)Updating files:  64% (282/440)Updating files:  65% (286/440)Updating files:  66% (291/440)Updating files:  67% (295/440)Updating files:  68% (300/440)Updating files:  69% (304/440)Updating files:  70% (308/440)Updating files:  71% (313/440)Updating files:  72% (317/440)Updating files:  73% (322/440)Updating files:  74% (326/440)Updating files:  75% (330/440)Updating files:  76% (335/440)Updating files:  77% (339/440)Updating files:  78% (344/440)Updating files:  79% (348/440)Updating files:  80% (352/440)Updating files:  81% (357/440)Updating files:  82% (361/440)Updating files:  83% (366/440)Updating files:  84% (370/440)Updating files:  85% (374/440)Updating files:  86% (379/440)Updating files:  87% (383/440)Updating files:  88% (388/440)Updating files:  89% (392/440)Updating files:  90% (396/440)Updating files:  91% (401/440)Updating files:  92% (405/440)Updating files:  93% (410/440)Updating files:  94% (414/440)Updating files:  95% (418/440)Updating files:  96% (423/440)Updating files:  97% (427/440)Updating files:  98% (432/440)Updating files:  99% (436/440)Updating files: 100% (440/440)Updating files: 100% (440/440), done.
-W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
-debconf: delaying package configuration, since apt-utils is not installed
+++ unset SCRIPT_PATH
+++ _OLD_VIRTUAL_PATH=/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+++ PATH=/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/bin:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+++ export PATH
+++ '[' x '!=' x ']'
++++ basename /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv
+++ VIRTUAL_ENV_PROMPT=.venv
+++ export VIRTUAL_ENV_PROMPT
+++ '[' -z '' ']'
+++ '[' -z '' ']'
+++ _OLD_VIRTUAL_PS1=
+++ PS1='(.venv) '
+++ export PS1
+++ alias pydoc
+++ true
+++ hash -r
++ PATCHED_REQUIREMENTS=/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/requirements-py312.txt
++ python -
+++ imp
+/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/setup_libero.sh: line 22: imp: command not found
++ uv pip install --requirements /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/requirements-py312.txt
+warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
+Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
+Resolved 117 packages in 1.99s
+Downloading pillow (6.6MiB)
+Downloading pygments (1.2MiB)
+Downloading wandb (15.4MiB)
+Downloading nvidia-cuda-runtime (2.1MiB)
+Downloading kiwisolver (1.4MiB)
+Downloading nvidia-cublas (403.5MiB)
+Downloading triton (236.5MiB)
+Downloading numba (3.7MiB)
+Downloading nvidia-cuda-nvrtc (86.0MiB)
+Downloading nvidia-curand (56.8MiB)
+Downloading cuda-bindings (6.8MiB)
+Downloading nvidia-cufft (204.2MiB)
+Downloading imageio-ffmpeg (28.1MiB)
+Downloading nvidia-cusparse (139.2MiB)
+Downloading nvidia-cuda-cupti (10.2MiB)
+Downloading pyopengl (3.0MiB)
+Downloading nvidia-cufile (1.2MiB)
+Downloading torchvision (7.1MiB)
+Downloading mujoco (27.4MiB)
+Downloading nvidia-nccl-cu13 (206.0MiB)
+Downloading grpcio (6.8MiB)
+Downloading tensorboard (5.3MiB)
+Downloading fonttools (5.1MiB)
+Downloading scipy (33.6MiB)
+Downloading tensorboard-data-server (6.3MiB)
+Downloading torch (528.9MiB)
+Downloading nvidia-nvshmem-cu13 (57.6MiB)
+Downloading nvidia-cusolver (191.6MiB)
+Downloading llvmlite (57.1MiB)
+Downloading networkx (2.0MiB)
+Downloading h5py (5.2MiB)
+Downloading matplotlib (7.9MiB)
+Downloading nvidia-cudnn-cu13 (527.5MiB)
+Downloading nvidia-cusparselt-cu13 (162.3MiB)
+Downloading hf-xet (4.3MiB)
+Downloading opencv-python (59.7MiB)
+Downloading robosuite (184.5MiB)
+Downloading nvidia-nvjitlink (40.5MiB)
+ Downloading nvidia-cufile
+ Downloading kiwisolver
+   Building future==0.18.2
+   Building gym==0.25.2
+   Building egl-probe==1.0.2
+   Building robomimic==0.2.0
+   Building easydict==1.9
+   Building bddl==1.0.1
+      Built easydict==1.9
+      Built robomimic==0.2.0
+ Downloading nvidia-cuda-runtime
+      Built gym==0.25.2
+      Built bddl==1.0.1
+      Built future==0.18.2
+ Downloading pygments
+      Built egl-probe==1.0.2
+ Downloading hf-xet
+ Downloading networkx
+ Downloading fonttools
+ Downloading h5py
+ Downloading tensorboard-data-server
+ Downloading tensorboard
+ Downloading pillow
+ Downloading torchvision
+ Downloading cuda-bindings
+ Downloading numba
+ Downloading grpcio
+ Downloading nvidia-cuda-cupti
+ Downloading matplotlib
+ Downloading imageio-ffmpeg
+ Downloading wandb
+ Downloading mujoco
+ Downloading nvidia-nvjitlink
+ Downloading scipy
+ Downloading nvidia-curand
+ Downloading nvidia-nvshmem-cu13
+ Downloading llvmlite
+ Downloading opencv-python
+ Downloading nvidia-cuda-nvrtc
+ Downloading nvidia-cusparse
+ Downloading pyopengl
+ Downloading nvidia-cusparselt-cu13
+ Downloading nvidia-cusolver
+ Downloading nvidia-cufft
+ Downloading nvidia-nccl-cu13
+ Downloading robosuite
+ Downloading triton
+ Downloading nvidia-cublas
+ Downloading nvidia-cudnn-cu13
+ Downloading torch
+Prepared 97 packages in 1m 20s
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 117 packages in 2m 23s
+ + absl-py==2.5.0
+ + antlr4-python3-runtime==4.9.3
+ + attrs==26.1.0
+ + bddl==1.0.1
+ + certifi==2026.7.22
+ + charset-normalizer==3.5.1
+ + click==8.5.0
+ + cloudpickle==2.1.0
+ + contourpy==1.3.3
+ + cuda-bindings==13.4.3
+ + cuda-pathfinder==1.8.2
+ + cuda-toolkit==13.0.3.0
+ + cycler==0.12.1
+ + docker-pycreds==0.4.0
+ + easydict==1.9
+ + egl-probe==1.0.2
+ + einops==0.4.1
+ + etils==1.14.0
+ + fastjsonschema==2.22.2
+ + filelock==4.0.6
+ + fonttools==4.66.0
+ + fsspec==2026.9.0
+ + future==0.18.2
+ + gitdb==4.0.12
+ + gitpython==3.1.62
+ + glfw==2.10.2
+ + grpcio==1.84.0
+ + gym==0.25.2
+ + gym-notices==0.1.0
+ + h5py==3.16.0
+ + hf-xet==1.6.0
+ + huggingface-hub==0.36.2
+ + hydra-core==1.3.2
+ + idna==3.20
+ + imageio==2.38.0
+ + imageio-ffmpeg==0.6.0
+ + iniconfig==2.3.0
+ + jinja2==3.1.6
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + jupyter-core==5.9.1
+ + jupytext==1.19.5
+ + kiwisolver==1.5.1
+ + llvmlite==0.49.0
+ + markdown==3.11
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.3
+ + matplotlib==3.9.4
+ + mdit-py-plugins==0.6.1
+ + mdurl==0.1.2
+ + mpmath==1.3.0
+ + mujoco==3.14.0
+ + nbformat==5.11.1
+ + networkx==3.7
+ + numba==0.67.0
+ + numpy==1.26.4
+ + nvidia-cublas==13.1.1.3
+ + nvidia-cuda-cupti==13.0.85
+ + nvidia-cuda-nvrtc==13.0.88
+ + nvidia-cuda-runtime==13.0.96
+ + nvidia-cudnn-cu13==9.24.0.43
+ + nvidia-cufft==12.0.0.61
+ + nvidia-cufile==1.15.1.6
+ + nvidia-curand==10.4.0.35
+ + nvidia-cusolver==12.0.4.66
+ + nvidia-cusparse==12.6.3.3
+ + nvidia-cusparselt-cu13==0.8.1
+ + nvidia-nccl-cu13==2.30.7
+ + nvidia-nvjitlink==13.4.92
+ + nvidia-nvshmem-cu13==3.4.5
+ + nvidia-nvtx==13.0.85
+ + omegaconf==2.3.1
+ + opencv-python==4.10.0.84
+ + packaging==26.3
+ + pillow==12.3.0
+ + platformdirs==4.12.1
+ + pluggy==1.6.0
+ + protobuf==5.29.6
+ + psutil==7.2.2
+ + pygments==2.21.0
+ + pyopengl==3.1.10
+ + pyparsing==3.3.3
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + referencing==0.37.0
+ + regex==2026.9.29
+ + requests==2.34.2
+ + robomimic==0.2.0
+ + robosuite==1.4.0
+ + rpds-py==2026.6.3
+ + safetensors==0.8.0
+ + scipy==1.17.1
+ + sentry-sdk==2.71.0
+ + setproctitle==1.3.7
+ + setuptools==84.0.0
+ + six==1.17.0
+ + smmap==5.0.3
+ + sympy==1.14.0
+ + tensorboard==2.20.0
+ + tensorboard-data-server==0.7.2
+ + tensorboardx==2.6.5
+ + termcolor==3.3.0
+ + thop==0.1.1.post2209072238
+ + tokenizers==0.22.2
+ + torch==2.14.0
+ + torchvision==0.29.0
+ + tqdm==4.70.1
+ + traitlets==5.16.1
+ + transformers==4.57.3
+ + triton==3.8.0
+ + typing-extensions==4.16.0
+ + urllib3==2.8.0
+ + wandb==0.18.7
+ + websockets==17.1
+ + werkzeug==3.1.9
+ + zipp==4.1.0
++ uv pip install -e /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/../../../../external_dependencies/LIBERO --config-settings editable_mode=compat
+warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
+Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
+Resolved 1 package in 1.02s
+   Building libero @ file:///workspace/Isaac-GR00T/external_dependencies/LIBERO
+      Built libero @ file:///workspace/Isaac-GR00T/external_dependencies/LIBERO
+Prepared 1 package in 470ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 1 package in 249ms
+ + libero==0.1.0 (from file:///workspace/Isaac-GR00T/external_dependencies/LIBERO)
++ uv pip install torch==2.9.0 torchvision==0.24.0 pydantic av tianshou==0.5.1 numba==0.65.1 llvmlite==0.47.0 tyro pandas dm_tree einops==0.8.1 albumentations==1.4.18 zmq
+warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
+Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
+Resolved 73 packages in 1.32s
+   Building zmq==0.0.0
+Downloading pydantic-core (2.0MiB)
+Downloading numpy (15.9MiB)
+Downloading av (34.1MiB)
+Downloading pandas (10.3MiB)
+Downloading opencv-python-headless (58.4MiB)
+Downloading llvmlite (53.7MiB)
+Downloading numba (3.6MiB)
+Downloading torchvision (7.7MiB)
+Downloading torch (858.1MiB)
+Downloading scikit-image (12.9MiB)
+      Built zmq==0.0.0
+ Downloading pydantic-core
+ Downloading torchvision
+ Downloading numba
+ Downloading scikit-image
+ Downloading numpy
+ Downloading av
+ Downloading llvmlite
+ Downloading opencv-python-headless
+ Downloading pandas
+ Downloading torch
+Prepared 27 packages in 21.26s
+Uninstalled 7 packages in 20.89s
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 46 packages in 2m 18s
+ + albucore==0.0.17
+ + albumentations==1.4.18
+ + annotated-types==0.8.0
+ + av==18.1.0
+ + dm-tree==0.1.10
+ + docstring-parser==0.18.0
+ - einops==0.4.1
+ + einops==0.8.1
+ + eval-type-backport==0.4.0
+ + farama-notifications==0.0.6
+ + gymnasium==1.3.0
+ + lazy-loader==0.6
+ - llvmlite==0.49.0
+ + llvmlite==0.47.0
+ - numba==0.67.0
+ + numba==0.65.1
+ - numpy==1.26.4
+ + numpy==2.4.6
+ + nvidia-cublas-cu12==12.8.4.1
+ + nvidia-cuda-cupti-cu12==12.8.90
+ + nvidia-cuda-nvrtc-cu12==12.8.93
+ + nvidia-cuda-runtime-cu12==12.8.90
+ + nvidia-cudnn-cu12==9.10.2.21
+ + nvidia-cufft-cu12==11.3.3.83
+ + nvidia-cufile-cu12==1.13.1.3
+ + nvidia-curand-cu12==10.3.9.90
+ + nvidia-cusolver-cu12==11.7.3.90
+ + nvidia-cusparse-cu12==12.5.8.93
+ + nvidia-cusparselt-cu12==0.7.1
+ + nvidia-nccl-cu12==2.27.5
+ + nvidia-nvjitlink-cu12==12.8.93
+ + nvidia-nvshmem-cu12==3.3.20
+ + nvidia-nvtx-cu12==12.8.90
+ + opencv-python-headless==5.0.0.93
+ + pandas==3.0.6
+ + pettingzoo==1.27.0
+ + pydantic==2.13.5
+ + pydantic-core==2.46.5
+ + pyzmq==27.2.0
+ + scikit-image==0.26.0
+ + tianshou==0.5.1
+ + tifffile==2026.9.20
+ - torch==2.14.0
+ + torch==2.9.0
+ - torchvision==0.29.0
+ + torchvision==0.24.0
+ - triton==3.8.0
+ + triton==3.5.0
+ + typeguard==4.6.0
+ + typing-inspection==0.4.4
+ + tyro==1.0.16
+ + wrapt==2.5.0
+ + zmq==0.0.0
++ uv pip install transformers==4.57.3 msgpack==1.1.0 msgpack-numpy==0.4.8 gymnasium==0.29.1
+warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
+Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
+Resolved 23 packages in 433ms
+Prepared 1 package in 222ms
+Uninstalled 1 package in 579ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 3 packages in 2.49s
+ - gymnasium==1.3.0
+ + gymnasium==0.29.1
+ + msgpack==1.1.0
+ + msgpack-numpy==0.4.8
++ uv pip install numpy==1.26.4 mujoco==3.3.1
+warning: The `extra-build-dependencies` option is experimental and may change without warning. Pass `--preview-features extra-build-dependencies` to disable this warning.
+Using Python 3.12.3 environment at: gr00t/eval/sim/LIBERO/libero_uv/.venv
+Resolved 9 packages in 106ms
+Downloading mujoco (6.4MiB)
+ Downloading mujoco
+Prepared 1 package in 241ms
+Uninstalled 2 packages in 2.36s
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 2 packages in 8.31s
+ - mujoco==3.14.0
+ + mujoco==3.3.1
+ - numpy==2.4.6
+ + numpy==1.26.4
++ python -c 'import sysconfig, pathlib; pathlib.Path(sysconfig.get_path('\''purelib'\''), '\''gr00t.pth'\'').write_text(pathlib.Path('\''/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/../../../..'\'').resolve().as_posix() + '\''\n'\'')'
++ rm -rf /root/.libero
++ printf 'n\n'
++ python -c 'from gr00t.eval.sim.LIBERO.libero_env import register_libero_envs'
+Do you want to specify a custom path for the dataset folder? (Y/N): /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/robosuite/__init__.py:30: SyntaxWarning: invalid escape sequence '\ '
+  __logo__ = """
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+Initializing the default config file...
+The following information is stored in the config file: /root/.libero/config.yaml
+benchmark_root: /workspace/Isaac-GR00T/external_dependencies/LIBERO/libero/libero
+bddl_files: /workspace/Isaac-GR00T/external_dependencies/LIBERO/libero/libero/./bddl_files
+init_states: /workspace/Isaac-GR00T/external_dependencies/LIBERO/libero/libero/./init_files
+datasets: /workspace/Isaac-GR00T/external_dependencies/LIBERO/libero/libero/../datasets
+assets: /workspace/Isaac-GR00T/external_dependencies/LIBERO/libero/libero/./assets
++ python -
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/gymnasium/utils/passive_env_checker.py:135: UserWarning: [33mWARN: The obs returned by the `reset()` method was expecting numpy array dtype to be float32, actual type: float64[0m
+  logger.warn(
+/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/gymnasium/utils/passive_env_checker.py:131: UserWarning: [33mWARN: The obs returned by the `reset()` method was expecting a numpy array, actual type: <class 'list'>[0m
+  logger.warn(
+/workspace/Isaac-GR00T/gr00t/eval/sim/LIBERO/libero_uv/.venv/lib/python3.12/site-packages/gymnasium/spaces/box.py:240: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Env OK: <class 'gymnasium.wrappers.order_enforcing.OrderEnforcing'>
