@@ -1,12 +1,3 @@
-{'loss': 0.113, 'grad_norm': 0.28729891777038574, 'learning_rate': 7.086414010614276e-05}
-{'loss': 0.1147, 'grad_norm': 0.3916562497615814, 'learning_rate': 7.061338533955043e-05}
-{'loss': 0.1157, 'grad_norm': 0.44241344928741455, 'learning_rate': 7.036200439430725e-05}
-{'loss': 0.1227, 'grad_norm': 0.39208105206489563, 'learning_rate': 7.01100049066835e-05}
-{'loss': 0.1161, 'grad_norm': 0.38804909586906433, 'learning_rate': 6.985739453173903e-05}
-{'loss': 0.1289, 'grad_norm': 0.4332415461540222, 'learning_rate': 6.960418094309085e-05}
-{'loss': 0.115, 'grad_norm': 0.31260135769844055, 'learning_rate': 6.93503718326799e-05}
-{'loss': 0.1163, 'grad_norm': 0.44898656010627747, 'learning_rate': 6.909597491053751e-05}
-{'loss': 0.1152, 'grad_norm': 0.2772443890571594, 'learning_rate': 6.884099790455113e-05}
 {'loss': 0.1198, 'grad_norm': 0.32108074426651, 'learning_rate': 6.858544856022952e-05}
 {'loss': 0.1168, 'grad_norm': 0.27737247943878174, 'learning_rate': 6.83293346404676e-05}
 {'loss': 0.1161, 'grad_norm': 0.38453856110572815, 'learning_rate': 6.80726639253105e-05}
@@ -398,3 +389,12 @@ Copying wandb_config.json from /workspace/mhh-long-runs/T5_seed22_att2/train/wan
 [eval] libero_sim/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it: 20/20
 [eval] libero_sim/KITCHEN_SCENE8_put_both_moka_pots_on_the_stove shard base_seed=21060823
 [eval] libero_sim/KITCHEN_SCENE8_put_both_moka_pots_on_the_stove shard base_seed=21060828
+[eval] libero_sim/KITCHEN_SCENE8_put_both_moka_pots_on_the_stove shard base_seed=21060833
+[eval] libero_sim/KITCHEN_SCENE8_put_both_moka_pots_on_the_stove shard base_seed=21060838
+[eval] libero_sim/KITCHEN_SCENE8_put_both_moka_pots_on_the_stove: 16/20
+[eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket shard base_seed=20960823
+[eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket shard base_seed=20960828
+[eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket shard base_seed=20960833
+[eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket shard base_seed=20960838
+[eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket: 20/20
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket shard base_seed=20260823
