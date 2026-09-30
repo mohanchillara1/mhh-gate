@@ -1,15 +1,3 @@
-{'loss': 0.1198, 'grad_norm': 0.32108074426651, 'learning_rate': 6.858544856022952e-05}
-{'loss': 0.1168, 'grad_norm': 0.27737247943878174, 'learning_rate': 6.83293346404676e-05}
-{'loss': 0.1161, 'grad_norm': 0.38453856110572815, 'learning_rate': 6.80726639253105e-05}
-{'loss': 0.1166, 'grad_norm': 0.293330579996109, 'learning_rate': 6.781544421171732e-05}
-{'loss': 0.1215, 'grad_norm': 0.31359604001045227, 'learning_rate': 6.755768331332424e-05}
-{'loss': 0.1273, 'grad_norm': 0.3627248704433441, 'learning_rate': 6.729938906020713e-05}
-{'loss': 0.1221, 'grad_norm': 0.3110063970088959, 'learning_rate': 6.704056929864376e-05}
-{'loss': 0.1133, 'grad_norm': 0.4274059534072876, 'learning_rate': 6.67812318908754e-05}
-{'loss': 0.1145, 'grad_norm': 0.3630475699901581, 'learning_rate': 6.6521384714868e-05}
-{'loss': 0.1162, 'grad_norm': 0.3284793198108673, 'learning_rate': 6.626103566407295e-05}
-{'loss': 0.1147, 'grad_norm': 0.41250211000442505, 'learning_rate': 6.600019264718713e-05}
-{'loss': 0.1169, 'grad_norm': 0.3718434274196625, 'learning_rate': 6.573886358791285e-05}
 {'loss': 0.128, 'grad_norm': 0.5281934142112732, 'learning_rate': 6.547705642471703e-05}
 {'loss': 0.1152, 'grad_norm': 0.38028064370155334, 'learning_rate': 6.521477911059008e-05}
 {'loss': 0.1146, 'grad_norm': 0.30641674995422363, 'learning_rate': 6.495203961280434e-05}
@@ -398,3 +386,15 @@ Copying wandb_config.json from /workspace/mhh-long-runs/T5_seed22_att2/train/wan
 [eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket shard base_seed=20960838
 [eval] libero_sim/LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket: 20/20
 [eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket shard base_seed=20260823
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket shard base_seed=20260828
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket shard base_seed=20260833
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket shard base_seed=20260838
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket: 20/20
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket shard base_seed=20360823
+!! shard returned 6 episodes, expected 5 (invalid episodes are filtered by rollout_policy.py:485-491) -- recorded as-is
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket shard base_seed=20360828
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket shard base_seed=20360833
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket shard base_seed=20360838
+[eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket: 21/21
+[eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate shard base_seed=20660823
+[eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate shard base_seed=20660828
