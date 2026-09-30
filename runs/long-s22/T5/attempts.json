@@ -2,11 +2,18 @@
   "T5/seed22": [
     {
       "attempt": 1,
-      "status": "crashed",
-      "recorded_at_utc": "2026-09-29T10:17:00Z",
       "pod": "x49fp4y4sr5oxi",
+      "reason": "infrastructure: the chain's balance guard stopped the pod at step 2003/6000 on a false STOP_SHORT (checkpoint-2000 save spiked tqdm's rate to 19 s/it). Pod could not resume: GPU reassigned. Recorded by hand on the attempt-2 pod so run_gate numbers the rerun 2 and applies the one-rerun crash policy. Status record: github runs/long-s22-T5 commit 7519fd7.",
+      "recorded_at_utc": "2026-09-29T10:17:00Z",
       "run_dir": "/workspace/mhh-long-runs/T5_seed22_att1 (on pod x49fp4y4sr5oxi, stopped, not terminated)",
-      "reason": "infrastructure: the chain's balance guard stopped the pod at step 2003/6000 on a false STOP_SHORT (checkpoint-2000 save spiked tqdm's rate to 19 s/it). Pod could not resume: GPU reassigned. Recorded by hand on the attempt-2 pod so run_gate numbers the rerun 2 and applies the one-rerun crash policy. Status record: github runs/long-s22-T5 commit 7519fd7."
+      "status": "crashed"
+    },
+    {
+      "attempt": 2,
+      "recorded_at_utc": "2026-09-30T03:47:02+00:00",
+      "run_dir": "/workspace/mhh-long-runs/T5_seed22_att2",
+      "status": "completed",
+      "suite_sr": 0.9800000000000001
     }
   ]
 }

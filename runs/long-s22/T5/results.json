@@ -1,25 +1,8 @@
 {
-  "argv": [
-    "run_gate.py",
-    "--arm",
-    "T5",
-    "--seed",
-    "22",
-    "--notes",
-    "LIBERO-Long seed 22 (exploratory, off-protocol, not pooled). Overlay long_s22/make_overlay.py; osmesa."
-  ],
   "arm": "T5",
   "attempt": 2,
-  "config_py_sha256": "40b830ed28b1f51fab079dd43d3f453fa972ad254cec40c271c77a143decd12a",
-  "convergence_arm": false,
-  "divergence_scan": {
-    "diverged": false,
-    "last_logged_loss": 0.0771,
-    "non_finite_entries": [],
-    "trainer_state_files_scanned": 1
-  },
-  "dry_run": false,
   "estimated_cost_usd": 7.47,
+  "eval_exploratory_2x": null,
   "eval_list_sha256": "5c1fcaa8d90d1a8e1963053f5f13c9692d254f2dd906de2b94704ffe44c3ac69",
   "eval_primary": {
     "checkpoint": "/workspace/mhh-long-runs/T5_seed22_att2/train/checkpoint-6000",
@@ -744,10 +727,7 @@
     "suite_success_rate_macro": 0.9800000000000001,
     "total_episodes": 202
   },
-  "finished_at_utc": "2026-09-30T03:47:02+00:00",
   "fixed_step_count": 6000,
-  "gate_script_sha256": "1c5788c455f67c9789f2c77e8f891ad99cddb823c7db55d00927608c60dab951",
-  "notes": "LIBERO-Long seed 22 (exploratory, off-protocol, not pooled). Overlay long_s22/make_overlay.py; osmesa.",
   "preflight": {
     "A_allow_padding": {
       "checked_at": "extract_step_data (sharded_single_step_dataset.py:27-79)",
@@ -829,163 +809,16 @@
       ]
     }
   },
-  "preregistered_recipe": {
-    "A40_USD_PER_HOUR": 0.44,
-    "ALLOW_PADDING": true,
-    "EPISODE_SAMPLING_RATE": 0.1,
-    "EVAL_EPISODES_PER_TASK": 20,
-    "EVAL_SHARD_SIZE": 5,
-    "GLOBAL_BATCH_SIZE": 16,
-    "GRADIENT_ACCUMULATION_STEPS": 4,
-    "LEARNING_RATE": 0.0001,
-    "LIBERO_SUITE": "libero_10",
-    "MAX_EPISODE_STEPS": 720,
-    "MULTIPROCESSING_CONTEXT": "fork",
-    "NUM_GPUS": 1,
-    "N_ACTION_STEPS": 8,
-    "PREREGISTERED_SEEDS": [
-      11,
-      12,
-      13,
-      14,
-      15
-    ],
-    "SAVE_STEPS": 1000,
-    "SAVE_TOTAL_LIMIT": 1,
-    "SHARD_SIZE": 1024,
-    "STATE_DROPOUT_PROB": 0.2,
-    "TRAIN_MAX_STEPS": 6000,
-    "TUNE_DIFFUSION_MODEL": true,
-    "TUNE_LLM": false,
-    "TUNE_PROJECTOR": true,
-    "TUNE_VISUAL": false,
-    "USE_MEAN_STD": false,
-    "USE_PERCENTILES": true,
-    "WARMUP_RATIO": 0.05,
-    "WEIGHT_DECAY": 1e-05
-  },
-  "provenance": {
-    "arm": "T5",
-    "base_model_path": "nvidia/GR00T-N1.7-3B",
-    "captured_at_utc": "2026-09-29T10:48:59+00:00",
-    "dataset": {
-      "meta_files": {
-        "meta/episodes.jsonl": {
-          "bytes": 43755,
-          "sha256": "5589f8f87cfddb34812782462160bf55b0d3082e404240682d1d0a89faba8265"
-        },
-        "meta/episodes_stats.jsonl": {
-          "bytes": 938760,
-          "sha256": "884f963e29d3078a0c32099d055a7d46e4701935b2a00f70c68801baae9619ea"
-        },
-        "meta/info.json": {
-          "bytes": 3350,
-          "sha256": "e5643c4e72e65f133ce0b1a5b9d9aaa5b2f065ed7f0f00ebbc231bde61af96d5"
-        },
-        "meta/modality.json": {
-          "bytes": 1394,
-          "sha256": "ecb86712195689112f8328c7952523e558d1b495dcbc3be7e2d4cd5a16a0cf6d"
-        },
-        "meta/stats.json": {
-          "bytes": 3870,
-          "sha256": "8283e003742e41f0a55cce468daee0c388e7d203e72b6a51d53c04765fb68110"
-        },
-        "meta/tasks.jsonl": {
-          "bytes": 923,
-          "sha256": "45f9eb4d4b6b04999f64640c0aae380555372b7b273a904f5f459ad05d4a0a6a"
-        }
-      },
-      "n_mp4": 758,
-      "path": "/workspace/Isaac-GR00T/examples/LIBERO/libero_10_no_noops_1.0.0_lerobot"
-    },
-    "env_vars_of_interest": {
-      "CUBLAS_WORKSPACE_CONFIG": null,
-      "CUDA_VISIBLE_DEVICES": null,
-      "GR00T_EVAL_SEED": null,
-      "HF_HOME": "/workspace/hf",
-      "HF_TOKEN_PATH": null,
-      "MUJOCO_GL": "osmesa",
-      "PYOPENGL_PLATFORM": "osmesa",
-      "PYTHONHASHSEED": null,
-      "WANDB_MODE": null
-    },
-    "eval_episode_seeds_hash": "181fd288177ebcc4447ddaf42e4c45aa056e40d49e94302f05c5d43777268871",
-    "hostname": "3532e40ad2ba",
-    "isaac_groot": {
-      "commit": "51d4c89f72fda44cbf77285c6a8114b52676b8a1",
-      "describe": "51d4c89",
-      "dirty": true,
-      "matches_pin": true,
-      "path": "/workspace/Isaac-GR00T",
-      "pinned_commit": "51d4c89f72fda44cbf77285c6a8114b52676b8a1"
-    },
-    "libero_eval_env": {
-      "gymnasium": "0.29.1",
-      "libero_file": null,
-      "mujoco": "3.3.1",
-      "numpy": "1.26.4",
-      "python": "3.12.3",
-      "robosuite": "1.4.0",
-      "torch": "2.9.0+cu128"
-    },
-    "libero_instructions": {
-      "error": "probe did not return JSON",
-      "raw": "[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]\n{\"libero_sim/LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket\": {\"task_id\": 0, \"language\": \"put both the alphabet soup and the tomato sauce in the basket\", \"bddl_file\": \"LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket\": {\"task_id\": 1, \"language\": \"put both the cream cheese box and the butter in the basket\", \"bddl_file\": \"LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it\": {\"task_id\": 2, \"language\": \"turn on the stove and put the moka pot on it\", \"bddl_file\": \"KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it\": {\"task_id\": 3, \"language\": \"put the black bowl in the bottom drawer of the cabinet and close it\", \"bddl_file\": \"KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate\": {\"task_id\": 4, \"language\": \"put the white mug on the left plate and put the yellow and white mug on the right plate\", \"bddl_file\": \"LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate.bddl\", \"problem_folder\": \"libero_10\"}, \"libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy\": {\"task_id\": 5, \"language\": \"pick up the book and place it in the back compartment of the caddy\", \"bddl_file\": \"STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy.bddl\", \"problem_folder\": \"libero_"
-    },
-    "libero_repo": {
-      "commit": "8f1084e3132a39270c3a13ebe37270a43ece2a01",
-      "describe": "8f1084e",
-      "dirty": false,
-      "path": "/workspace/Isaac-GR00T/external_dependencies/LIBERO"
-    },
-    "seed": 22,
-    "training_env": {
-      "accelerate": "1.13.0",
-      "bf16_supported": true,
-      "cuda_available": true,
-      "cuda_version": "12.8",
-      "executable": "/workspace/Isaac-GR00T/.venv/bin/python",
-      "gpus": [
-        {
-          "capability": [
-            8,
-            6
-          ],
-          "name": "NVIDIA A40",
-          "total_mem_gib": 44.43
-        }
-      ],
-      "numpy": "1.26.4",
-      "nvidia_smi": "NVIDIA A40, 570.195.03, 46068 MiB",
-      "pandas": "2.2.3",
-      "platform": "Linux-6.8.0-60-generic-x86_64-with-glibc2.39",
-      "python": "3.12.3",
-      "torch": "2.9.0+cu128",
-      "torchcodec": "0.8.0",
-      "transformers": "4.57.3"
-    },
-    "video_delta_indices": [
-      -4,
-      -3,
-      -2,
-      -1,
-      0
-    ]
+  "provenance_summary": {
+    "isaac_groot_commit": "51d4c89f72fda44cbf77285c6a8114b52676b8a1",
+    "libero_commit": "8f1084e3132a39270c3a13ebe37270a43ece2a01",
+    "mujoco": "3.3.1",
+    "numpy": "1.26.4",
+    "torch": "2.9.0+cu128"
   },
   "results_log_line": "| RUN T5-s22-a2 | arm=T5 | seed=22 | steps=6000 | groot=51d4c89f7 | mujoco=3.3.1 | eval_eps=202 | eval_list=5c1fcaa8d90d | allow_padding_asserted=PASS | arch=LLM16/DiT32 | SR=0.9800 | wallclock_h=16.968 | cost_usd~=7.47 | status=completed | weirdness=isaac-groot working tree dirty |",
   "run_id": "T5-s22-a2",
   "seed": 22,
-  "started_at_utc": "2026-09-29T10:48:57+00:00",
   "status": "completed",
-  "train_max_steps": 6000,
-  "train_seconds": 45366.1,
-  "video_delta_indices": [
-    -4,
-    -3,
-    -2,
-    -1,
-    0
-  ],
-  "wall_clock_hours": 16.968,
-  "weirdness": "isaac-groot working tree dirty"
+  "wall_clock_hours": 16.968
 }

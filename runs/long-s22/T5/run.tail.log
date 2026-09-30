@@ -1,25 +1,3 @@
-{'loss': 0.128, 'grad_norm': 0.5281934142112732, 'learning_rate': 6.547705642471703e-05}
-{'loss': 0.1152, 'grad_norm': 0.38028064370155334, 'learning_rate': 6.521477911059008e-05}
-{'loss': 0.1146, 'grad_norm': 0.30641674995422363, 'learning_rate': 6.495203961280434e-05}
-{'loss': 0.1096, 'grad_norm': 0.2671912610530853, 'learning_rate': 6.468884591267204e-05}
-{'loss': 0.1235, 'grad_norm': 0.2802644371986389, 'learning_rate': 6.44252060053028e-05}
-{'loss': 0.1116, 'grad_norm': 0.39230749011039734, 'learning_rate': 6.416112789936086e-05}
-{'loss': 0.1167, 'grad_norm': 0.2745268642902374, 'learning_rate': 6.389661961682173e-05}
-{'loss': 0.1178, 'grad_norm': 0.32571783661842346, 'learning_rate': 6.363168919272846e-05}
-{'loss': 0.1195, 'grad_norm': 0.36419931054115295, 'learning_rate': 6.336634467494768e-05}
-{'loss': 0.1125, 'grad_norm': 0.39666256308555603, 'learning_rate': 6.310059412392505e-05}
-{'loss': 0.1161, 'grad_norm': 0.4046962261199951, 'learning_rate': 6.283444561244042e-05}
-{'loss': 0.1199, 'grad_norm': 0.34411904215812683, 'learning_rate': 6.256790722536251e-05}
-{'loss': 0.1143, 'grad_norm': 0.3688749074935913, 'learning_rate': 6.230098705940354e-05}
-{'loss': 0.1147, 'grad_norm': 0.39102864265441895, 'learning_rate': 6.203369322287306e-05}
-{'loss': 0.1123, 'grad_norm': 0.40628722310066223, 'learning_rate': 6.17660338354317e-05}
-{'loss': 0.1129, 'grad_norm': 0.37320584058761597, 'learning_rate': 6.149801702784456e-05}
-{'loss': 0.1068, 'grad_norm': 0.3322407603263855, 'learning_rate': 6.122965094173424e-05}
-{'loss': 0.1196, 'grad_norm': 0.3854519724845886, 'learning_rate': 6.0960943729333374e-05}
-{'loss': 0.1122, 'grad_norm': 0.38739898800849915, 'learning_rate': 6.069190355323717e-05}
-{'loss': 0.1089, 'grad_norm': 0.3635566532611847, 'learning_rate': 6.042253858615532e-05}
-{'loss': 0.1109, 'grad_norm': 0.3479134738445282, 'learning_rate': 6.015285701066382e-05}
-{'loss': 0.1122, 'grad_norm': 0.44998595118522644, 'learning_rate': 5.988286701895631e-05}
 {'loss': 0.1142, 'grad_norm': 0.3394032418727875, 'learning_rate': 5.961257681259535e-05}
 {'loss': 0.1119, 'grad_norm': 0.4494955241680145, 'learning_rate': 5.934199460226317e-05}
 {'loss': 0.1058, 'grad_norm': 0.34752535820007324, 'learning_rate': 5.9071128607512285e-05}
@@ -398,3 +376,25 @@ Copying wandb_config.json from /workspace/mhh-long-runs/T5_seed22_att2/train/wan
 [eval] libero_sim/LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket: 21/21
 [eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate shard base_seed=20660823
 [eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate shard base_seed=20660828
+[eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate shard base_seed=20660833
+[eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate shard base_seed=20660838
+[eval] libero_sim/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate: 20/20
+[eval] libero_sim/LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate shard base_seed=20860823
+[eval] libero_sim/LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate shard base_seed=20860828
+[eval] libero_sim/LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate shard base_seed=20860833
+[eval] libero_sim/LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate shard base_seed=20860838
+[eval] libero_sim/LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate: 20/20
+[eval] libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy shard base_seed=20760823
+[eval] libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy shard base_seed=20760828
+[eval] libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy shard base_seed=20760833
+[eval] libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy shard base_seed=20760838
+[eval] libero_sim/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy: 20/20
+
+==============================================================================
+[6/6] paste into #results-log:
+
+| RUN T5-s22-a2 | arm=T5 | seed=22 | steps=6000 | groot=51d4c89f7 | mujoco=3.3.1 | eval_eps=202 | eval_list=5c1fcaa8d90d | allow_padding_asserted=PASS | arch=LLM16/DiT32 | SR=0.9800 | wallclock_h=16.968 | cost_usd~=7.47 | status=completed | weirdness=isaac-groot working tree dirty |
+
+full manifest : /workspace/mhh-long-runs/T5_seed22_att2/run_manifest.json
+results json  : /workspace/mhh-long-runs/T5_seed22_att2/results.json
+==============================================================================
